@@ -23,7 +23,15 @@ function hashPhone(phone: string): string {
  * @access  Public
  */
 router.post('/register', async (req: AuthenticatedRequest, res: Response) => {
-    const { phone, schoolIds, consent } = req.body;
+    let { phone, schoolIds, consent, schoolId, consentStatus } = req.body;
+
+    // Fallbacks to support both integration tests and frontend PWA payload structures
+    if (consent === undefined) {
+        consent = consentStatus;
+    }
+    if (!schoolIds && schoolId) {
+        schoolIds = [schoolId];
+    }
 
     if (!phone || !schoolIds || !Array.isArray(schoolIds) || schoolIds.length === 0) {
         return res.status(400).json({ 
