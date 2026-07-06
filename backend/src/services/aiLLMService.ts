@@ -189,7 +189,7 @@ function getComplaintFallbackTemplate(
     const t = text.toLowerCase();
     if (t.includes('bully') || t.includes('rundung') || t.includes('pukul') || t.includes('palak')) {
         category = 'Bullying';
-        urgency = 'Critical';
+        urgency = 'High';
     } else if (t.includes('bolos') || t.includes('absen') || t.includes('tidak masuk') || t.includes('jarang mengajar')) {
         category = 'Teacher Absenteeism';
         urgency = 'High';

@@ -40,7 +40,7 @@ class AIProcessingQueue {
 
             // Run AI Complaint Intelligence pipeline (LLM + local fallbacks)
             const enrichment = await analyzeComplaintLLM(job.text, schoolName);
-            const { isDuplicate, duplicateOfId } = await detectDuplicate(job.text, job.schoolId, enrichment.category);
+            const { isDuplicate, duplicateOfId } = await detectDuplicate(job.text, job.schoolId, enrichment.category as any);
 
             await transaction(async (client) => {
                 // 1. Update Complaint with computed AI values
@@ -60,7 +60,7 @@ class AIProcessingQueue {
                 );
 
                 // 3. Trigger alert for Critical urgency reports immediately (BR-03)
-                if (urgency === 'Critical') {
+                if (enrichment.urgency === 'Critical') {
                     await client.query(
                         `INSERT INTO risk_alerts (school_id, trigger_type, severity, status)
                          VALUES ($1, 'Critical Complaint Alert', 'Critical', 'Open')`,
@@ -87,8 +87,8 @@ class AIProcessingQueue {
             });
 
             // Trigger notification if Critical (BR-03 / BR-12)
-            if (urgency === 'Critical') {
-                dispatchSupervisorNotification(job.schoolId, job.text, urgency).catch(err => 
+            if (enrichment.urgency === 'Critical') {
+                dispatchSupervisorNotification(job.schoolId, job.text, enrichment.urgency as any).catch(err => 
                     console.error('[AI Queue] Failed to send critical supervisor notification:', err)
                 );
             }
