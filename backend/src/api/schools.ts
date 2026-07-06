@@ -121,4 +121,23 @@ router.get(
     }
 );
 
+/**
+ * @route   GET /api/v1/schools
+ * @desc    Get list of all schools (public selection for parent linkage)
+ * @access  Public
+ */
+router.get('/', async (req, res) => {
+    try {
+        const schoolsQuery = await query(
+            `SELECT school_id, name, npsn, district, geo_lat, geo_lng, cluster_id 
+             FROM schools 
+             ORDER BY name ASC`
+        );
+        return res.status(200).json({ schools: schoolsQuery.rows });
+    } catch (e) {
+        console.error('Error fetching schools list:', e);
+        return res.status(500).json({ error_code: 'INTERNAL_SERVER_ERROR', message: 'Failed to retrieve schools list' });
+    }
+});
+
 export default router;
