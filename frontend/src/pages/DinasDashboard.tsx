@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { fetchAPI } from '../utils/api';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { 
-    LayoutDashboard, MapPin, Calculator, ShieldAlert, FileText, 
-    RefreshCw, Download, ArrowRight
+    LayoutDashboard, Calculator, ShieldAlert, FileText, 
+    RefreshCw, Download, ArrowRight, ShieldCheck
 } from 'lucide-react';
 
 interface Recommendation {
@@ -45,15 +47,26 @@ interface School {
     district: string;
     geo_lat: number;
     geo_lng: number;
+    health_score?: number;
+    active_flags?: number;
+    active_alerts?: number;
 }
 
 export default function DinasDashboard() {
-    // Navigation state: 'overview' | 'simulation' | 'recommendations' | 'complaints'
+    // Session state
+    const [token, setToken] = useState(localStorage.getItem('token') || '');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loginError, setLoginError] = useState('');
+    const [userName, setUserName] = useState(localStorage.getItem('userName') || 'Analis Dinas');
+
+    // Navigation state
     const [activeTab, setActiveTab] = useState<'overview' | 'simulation' | 'recommendations' | 'complaints'>('overview');
 
     // General state
     const [schools, setSchools] = useState<School[]>([]);
     const [selectedSchoolId, setSelectedSchoolId] = useState('');
+
     // Simulation state
     const [simType, setSimType] = useState('add_teachers');
     const [simMag, setSimMag] = useState(2);
@@ -71,19 +84,93 @@ export default function DinasDashboard() {
     const [trainingLogs, setTrainingLogs] = useState('');
     const [training, setTraining] = useState(false);
 
-    useEffect(() => {
-        // Load initial data
-        fetchAPI('/schools').then(data => {
-            setSchools(data.schools || []);
-            if (data.schools?.length > 0) {
-                setSelectedSchoolId(data.schools[0].school_id);
-            }
-        }).catch(err => console.error(err));
+    // Leaflet map ref
+    const mapRef = useRef<L.Map | null>(null);
 
-        loadRecommendations();
-        loadAlerts();
-        loadComplaints();
-    }, []);
+    // Load data if authenticated
+    useEffect(() => {
+        if (token) {
+            loadDashboardData();
+        }
+    }, [token]);
+
+    // Setup Leaflet map when tab changes or schools load
+    useEffect(() => {
+        if (token && activeTab === 'overview' && schools.length > 0) {
+            // Wait brief moment for DOM element to render
+            const timer = setTimeout(() => {
+                const mapEl = document.getElementById('map-container');
+                if (mapEl && !mapRef.current) {
+                    const map = L.map('map-container', {
+                        scrollWheelZoom: false
+                    }).setView([-7.9666, 112.6326], 10); // Center on East Java (Malang/Surabaya region)
+                    
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(map);
+                    
+                    mapRef.current = map;
+                }
+
+                if (mapRef.current) {
+                    // Remove existing markers
+                    mapRef.current.eachLayer((layer) => {
+                        if (layer instanceof L.CircleMarker) {
+                            mapRef.current?.removeLayer(layer);
+                        }
+                    });
+
+                    // Add markers for each school
+                    schools.forEach(s => {
+                        if (s.geo_lat && s.geo_lng) {
+                            const score = Number(s.health_score || 50);
+                            let color = '#10b981'; // Green (emerald)
+                            if (score < 60) color = '#ef4444'; // Red (crimson)
+                            else if (score < 80) color = '#f59e0b'; // Amber (warning)
+
+                            const marker = L.circleMarker([s.geo_lat, s.geo_lng], {
+                                radius: 8,
+                                fillColor: color,
+                                color: '#ffffff',
+                                weight: 2,
+                                opacity: 1,
+                                fillOpacity: 0.85
+                            }).addTo(mapRef.current!);
+
+                            marker.bindPopup(`
+                                <div style="font-family: sans-serif; font-size: 11px; padding: 4px;">
+                                    <strong style="font-size: 12px; color: #1e293b;">${s.name}</strong><br/>
+                                    <span style="color: #64748b;">NPSN: ${s.npsn}</span><br/>
+                                    <hr style="margin: 6px 0; border: 0; border-top: 1px solid #e2e8f0;"/>
+                                    <span>Skor Kesehatan: <strong>${score.toFixed(0)}/100</strong></span><br/>
+                                    <span>Alert Peringatan: <strong style="color: ${color};">${s.active_alerts || 0} Aktif</strong></span>
+                                </div>
+                            `);
+                        }
+                    });
+                }
+            }, 100);
+
+            return () => clearTimeout(timer);
+        }
+    }, [schools, activeTab, token]);
+
+    const loadDashboardData = async () => {
+        try {
+            // Load live risk map data containing coordinates, health scores, and alerts
+            const mapData = await fetchAPI('/risk-map');
+            setSchools(mapData.schools || []);
+            if (mapData.schools?.length > 0) {
+                setSelectedSchoolId(mapData.schools[0].school_id);
+            }
+
+            loadRecommendations();
+            loadAlerts();
+            loadComplaints();
+        } catch (err) {
+            console.error('Failed to load dashboard data:', err);
+        }
+    };
 
     const loadRecommendations = async () => {
         try {
@@ -109,6 +196,42 @@ export default function DinasDashboard() {
             setComplaints(data.complaints || []);
         } catch (err) {
             console.error(err);
+        }
+    };
+
+    // Login Handler
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoginError('');
+        try {
+            const data = await fetchAPI('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({ email, password })
+            });
+
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userName', data.user.name);
+                setToken(data.token);
+                setUserName(data.user.name);
+            }
+        } catch (err: any) {
+            setLoginError(err.message || 'Login gagal. Periksa kembali email dan password.');
+        }
+    };
+
+    // Logout Handler
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userName');
+        setToken('');
+        setSchools([]);
+        setRecs([]);
+        setAlerts([]);
+        setComplaints([]);
+        if (mapRef.current) {
+            mapRef.current.remove();
+            mapRef.current = null;
         }
     };
 
@@ -150,6 +273,9 @@ export default function DinasDashboard() {
             setResolvingAlertId('');
             setVisitNote('');
             loadAlerts();
+            // Refresh schools to update alerts count on map
+            const mapData = await fetchAPI('/risk-map');
+            setSchools(mapData.schools || []);
         } catch (err: any) {
             alert(`Gagal meresolusi alert: ${err.message}`);
         }
@@ -170,7 +296,77 @@ export default function DinasDashboard() {
         }
     };
 
-    // Render tabs
+    // Unauthenticated: Render Dinas Login Gate
+    if (!token) {
+        return (
+            <div className="min-h-screen bg-[#fafafa] flex items-center justify-center p-4">
+                <div className="bg-white max-w-md w-full border border-gray-200 rounded-2xl shadow-sm p-8 space-y-6">
+                    <div className="flex flex-col items-center">
+                        <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4">
+                            <ShieldCheck className="w-6 h-6" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-gray-900 font-display">Login Dinas Pendidikan</h2>
+                        <p className="text-sm text-gray-500 text-center mt-2">
+                            Masuk untuk mengakses Dashboard Analitik, Peta Risiko Spasial, dan Simulasi Kebijakan.
+                        </p>
+                    </div>
+
+                    {loginError && (
+                        <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-4 rounded-xl">
+                            {loginError}
+                        </div>
+                    )}
+
+                    <form onSubmit={handleLogin} className="space-y-4">
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                                Email Pengguna
+                            </label>
+                            <input
+                                type="email"
+                                placeholder="bu_rina@edupolicy.go.id"
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                                className="w-full bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white text-gray-900 px-4 py-3 rounded-xl transition duration-150 outline-none text-xs"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                                Kata Sandi
+                            </label>
+                            <input
+                                type="password"
+                                placeholder="••••••••"
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                className="w-full bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white text-gray-900 px-4 py-3 rounded-xl transition duration-150 outline-none text-xs"
+                                required
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition duration-150 text-xs shadow-sm"
+                        >
+                            Masuk Portal
+                        </button>
+                    </form>
+
+                    <div className="bg-blue-50 border border-blue-150 p-4 rounded-xl space-y-2">
+                        <span className="block text-[10px] font-bold text-blue-600 uppercase tracking-wider">KREDENSI DEMO INTEGRASI:</span>
+                        <div className="text-[10px] text-gray-600 leading-relaxed font-mono">
+                            <div>Email: <strong className="text-gray-900">bu_rina@edupolicy.go.id</strong></div>
+                            <div>Sandi: <strong className="text-gray-900">password123</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Authenticated: Render Dinas Dashboard
     return (
         <div className="min-h-screen bg-[#fafafa] flex flex-col md:flex-row text-gray-900 font-sans">
             {/* Sidebar Navigation */}
@@ -216,9 +412,17 @@ export default function DinasDashboard() {
                     </button>
                 </nav>
 
-                <div className="pt-6 border-t border-gray-150">
-                    <span className="text-[10px] text-gray-400 block font-semibold tracking-wider uppercase mb-1">ANALIS DINAS</span>
-                    <span className="text-xs font-bold text-gray-800">Bu Rina</span>
+                <div className="pt-6 border-t border-gray-150 flex justify-between items-center">
+                    <div>
+                        <span className="text-[10px] text-gray-400 block font-semibold tracking-wider uppercase mb-1">ANALIS LOGIN</span>
+                        <span className="text-xs font-bold text-gray-800">{userName}</span>
+                    </div>
+                    <button
+                        onClick={handleLogout}
+                        className="text-[10px] font-semibold text-red-500 hover:text-red-700"
+                    >
+                        Log Out
+                    </button>
                 </div>
             </aside>
 
@@ -226,10 +430,9 @@ export default function DinasDashboard() {
             <main className="flex-1 p-8 md:p-12 overflow-y-auto max-w-7xl mx-auto w-full">
                 {activeTab === 'overview' && (
                     <div className="space-y-8">
-                        {/* Title Header */}
                         <div>
                             <h2 className="text-3xl font-black text-gray-900 tracking-tight font-display">Ringkasan & Peta Risiko</h2>
-                            <p className="text-sm text-gray-500 mt-2">Daftar kesehatan sekolah, deteksi gap official vs survey, dan sebaran geografis.</p>
+                            <p className="text-sm text-gray-500 mt-2">Daftar kesehatan sekolah, deteksi gap data, dan sebaran geografis sekolah di Jawa Timur.</p>
                         </div>
 
                         {/* KPI Grid */}
@@ -252,19 +455,12 @@ export default function DinasDashboard() {
                             </div>
                         </div>
 
-                        {/* Simulated Map & List */}
+                        {/* Map & List */}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden p-6 space-y-4">
                                 <h3 className="text-sm font-bold text-gray-800 tracking-tight">Sebaran Geografis Titik Sekolah</h3>
-                                <div className="bg-gray-50 h-96 rounded-xl border border-gray-150 flex items-center justify-center text-center p-8 relative">
-                                    <div className="space-y-2">
-                                        <MapPin className="w-12 h-12 text-blue-500 mx-auto animate-pulse" />
-                                        <p className="text-sm font-bold text-gray-800">Visualisasi Peta Interaktif Jawa Timur</p>
-                                        <p className="text-xs text-gray-400 max-w-sm mx-auto">
-                                            SDN Lowokwaru 1 (NPSN: 20534013), SDN Lowokwaru 2 (NPSN: 20534014) terplot secara spasial untuk klasterisasi peer cluster.
-                                        </p>
-                                    </div>
-                                </div>
+                                {/* Leaflet Map Container */}
+                                <div id="map-container" className="h-96 rounded-xl border border-gray-150 z-10"></div>
                             </div>
 
                             <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-6">
