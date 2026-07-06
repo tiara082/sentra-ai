@@ -4,7 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { 
     LayoutDashboard, Calculator, ShieldAlert, FileText, 
-    RefreshCw, Download, ArrowRight, ShieldCheck
+    RefreshCw, Download, ArrowRight, ShieldCheck, CheckCircle, AlertTriangle
 } from 'lucide-react';
 
 interface Recommendation {
@@ -59,6 +59,8 @@ export default function DinasDashboard() {
     const [password, setPassword] = useState('');
     const [loginError, setLoginError] = useState('');
     const [userName, setUserName] = useState(localStorage.getItem('userName') || 'Analis Dinas');
+    const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || '');
+    const [userDistrictScope, setUserDistrictScope] = useState(localStorage.getItem('userDistrictScope') || '');
 
     // Navigation state
     const [activeTab, setActiveTab] = useState<'overview' | 'simulation' | 'recommendations' | 'complaints'>('overview');
@@ -66,6 +68,13 @@ export default function DinasDashboard() {
     // General state
     const [schools, setSchools] = useState<School[]>([]);
     const [selectedSchoolId, setSelectedSchoolId] = useState('');
+
+    // Principal specific state
+    const [principalSchool, setPrincipalSchool] = useState<School | null>(null);
+    const [principalHealth, setPrincipalHealth] = useState<any>(null);
+    const [principalFlags, setPrincipalFlags] = useState<any[]>([]);
+    const [updatingComplaintId, setUpdatingComplaintId] = useState('');
+    const [newStatusValue, setNewStatusValue] = useState<Record<string, string>>({});
 
     // Simulation state
     const [simType, setSimType] = useState('add_teachers');
@@ -90,20 +99,23 @@ export default function DinasDashboard() {
     // Load data if authenticated
     useEffect(() => {
         if (token) {
-            loadDashboardData();
+            if (userRole === 'Principal') {
+                loadPrincipalDashboardData();
+            } else {
+                loadDashboardData();
+            }
         }
-    }, [token]);
+    }, [token, userRole]);
 
-    // Setup Leaflet map when tab changes or schools load
+    // Setup Leaflet map when tab changes or schools load (only for Dinas/Supervisor)
     useEffect(() => {
-        if (token && activeTab === 'overview' && schools.length > 0) {
-            // Wait brief moment for DOM element to render
+        if (token && userRole !== 'Principal' && activeTab === 'overview' && schools.length > 0) {
             const timer = setTimeout(() => {
                 const mapEl = document.getElementById('map-container');
                 if (mapEl && !mapRef.current) {
                     const map = L.map('map-container', {
                         scrollWheelZoom: false
-                    }).setView([-7.9666, 112.6326], 10); // Center on East Java (Malang/Surabaya region)
+                    }).setView([-7.9666, 112.6326], 10);
                     
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; OpenStreetMap contributors'
@@ -113,20 +125,18 @@ export default function DinasDashboard() {
                 }
 
                 if (mapRef.current) {
-                    // Remove existing markers
                     mapRef.current.eachLayer((layer) => {
                         if (layer instanceof L.CircleMarker) {
                             mapRef.current?.removeLayer(layer);
                         }
                     });
 
-                    // Add markers for each school
                     schools.forEach(s => {
                         if (s.geo_lat && s.geo_lng) {
                             const score = Number(s.health_score || 50);
-                            let color = '#10b981'; // Green (emerald)
-                            if (score < 60) color = '#ef4444'; // Red (crimson)
-                            else if (score < 80) color = '#f59e0b'; // Amber (warning)
+                            let color = '#10b981'; 
+                            if (score < 60) color = '#ef4444'; 
+                            else if (score < 80) color = '#f59e0b'; 
 
                             const marker = L.circleMarker([s.geo_lat, s.geo_lng], {
                                 radius: 8,
@@ -153,11 +163,44 @@ export default function DinasDashboard() {
 
             return () => clearTimeout(timer);
         }
-    }, [schools, activeTab, token]);
+    }, [schools, activeTab, token, userRole]);
 
+    // Load data for Principal dashboard
+    const loadPrincipalDashboardData = async () => {
+        try {
+            // Find school name
+            const allSchools = await fetchAPI('/schools');
+            const mySchool = allSchools.schools?.find((s: School) => s.school_id === userDistrictScope);
+            if (mySchool) {
+                setPrincipalSchool(mySchool);
+            }
+
+            // Get health details
+            const healthData = await fetchAPI(`/schools/${userDistrictScope}/health-score?period=2026-07`);
+            setPrincipalHealth(healthData);
+
+            // Get ground truth flags
+            const flagsData = await fetchAPI(`/schools/${userDistrictScope}/ground-truth-flags?period=2026-07`);
+            setPrincipalFlags(flagsData.flags || []);
+
+            // Get complaints list for their school only
+            const complaintsData = await fetchAPI(`/complaints?schoolId=${userDistrictScope}`);
+            setComplaints(complaintsData.complaints || []);
+            
+            // Set initial status selection map
+            const initialStatuses: Record<string, string> = {};
+            complaintsData.complaints?.forEach((c: Complaint) => {
+                initialStatuses[c.complaint_id] = c.status;
+            });
+            setNewStatusValue(initialStatuses);
+        } catch (err) {
+            console.error('Failed to load principal details:', err);
+        }
+    };
+
+    // Load standard data for Dinas Analyst/Supervisor
     const loadDashboardData = async () => {
         try {
-            // Load live risk map data containing coordinates, health scores, and alerts
             const mapData = await fetchAPI('/risk-map');
             setSchools(mapData.schools || []);
             if (mapData.schools?.length > 0) {
@@ -212,8 +255,13 @@ export default function DinasDashboard() {
             if (data.token) {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('userName', data.user.name);
+                localStorage.setItem('userRole', data.user.role);
+                localStorage.setItem('userDistrictScope', data.user.districtScope);
+                
                 setToken(data.token);
                 setUserName(data.user.name);
+                setUserRole(data.user.role);
+                setUserDistrictScope(data.user.districtScope);
             }
         } catch (err: any) {
             setLoginError(err.message || 'Login gagal. Periksa kembali email dan password.');
@@ -224,14 +272,42 @@ export default function DinasDashboard() {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('userName');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userDistrictScope');
+        
         setToken('');
+        setUserRole('');
+        setUserDistrictScope('');
         setSchools([]);
         setRecs([]);
         setAlerts([]);
         setComplaints([]);
+        setPrincipalSchool(null);
+        setPrincipalHealth(null);
+        setPrincipalFlags([]);
         if (mapRef.current) {
             mapRef.current.remove();
             mapRef.current = null;
+        }
+    };
+
+    // Principal: Update Complaint Status Handler
+    const handleUpdateComplaintStatus = async (complaintId: string) => {
+        const selectedStatus = newStatusValue[complaintId];
+        if (!selectedStatus) return;
+
+        setUpdatingComplaintId(complaintId);
+        try {
+            await fetchAPI(`/complaints/${complaintId}/status`, {
+                method: 'PATCH',
+                body: JSON.stringify({ status: selectedStatus })
+            });
+            alert('Status pengaduan berhasil diperbarui!');
+            loadPrincipalDashboardData();
+        } catch (err: any) {
+            alert(`Gagal memperbarui status: ${err.message}`);
+        } finally {
+            setUpdatingComplaintId('');
         }
     };
 
@@ -273,7 +349,6 @@ export default function DinasDashboard() {
             setResolvingAlertId('');
             setVisitNote('');
             loadAlerts();
-            // Refresh schools to update alerts count on map
             const mapData = await fetchAPI('/risk-map');
             setSchools(mapData.schools || []);
         } catch (err: any) {
@@ -305,9 +380,9 @@ export default function DinasDashboard() {
                         <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4">
                             <ShieldCheck className="w-6 h-6" />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900 font-display">Login Dinas Pendidikan</h2>
+                        <h2 className="text-2xl font-bold text-gray-900 font-display">Login Portal Pengelola</h2>
                         <p className="text-sm text-gray-500 text-center mt-2">
-                            Masuk untuk mengakses Dashboard Analitik, Peta Risiko Spasial, dan Simulasi Kebijakan.
+                            Masuk sesuai peran Anda (Analis Dinas, Pengawas, atau Kepala Sekolah).
                         </p>
                     </div>
 
@@ -354,11 +429,21 @@ export default function DinasDashboard() {
                         </button>
                     </form>
 
-                    <div className="bg-blue-50 border border-blue-150 p-4 rounded-xl space-y-2">
+                    <div className="bg-blue-50 border border-blue-150 p-4 rounded-xl space-y-3">
                         <span className="block text-[10px] font-bold text-blue-600 uppercase tracking-wider">KREDENSI DEMO INTEGRASI:</span>
-                        <div className="text-[10px] text-gray-600 leading-relaxed font-mono">
-                            <div>Email: <strong className="text-gray-900">bu_rina@edupolicy.go.id</strong></div>
-                            <div>Sandi: <strong className="text-gray-900">password123</strong></div>
+                        <div className="text-[10px] text-gray-600 leading-relaxed font-mono space-y-2">
+                            <div>
+                                <span className="text-gray-900 font-bold block">1. Analis Dinas (Akses Penuh Peta & Simulasi)</span>
+                                Email: bu_rina@edupolicy.go.id<br/>Sandi: password123
+                            </div>
+                            <div>
+                                <span className="text-gray-900 font-bold block">2. Pengawas (Tindak Lanjut Alert Lapangan)</span>
+                                Email: pak_herman@edupolicy.go.id<br/>Sandi: password123
+                            </div>
+                            <div>
+                                <span className="text-gray-900 font-bold block">3. Kepala Sekolah (Hanya SDN Lowokwaru 1 & Ubah Status)</span>
+                                Email: bu_sari@edupolicy.go.id<br/>Sandi: password123
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -366,7 +451,181 @@ export default function DinasDashboard() {
         );
     }
 
-    // Authenticated: Render Dinas Dashboard
+    // Principal specialized Dashboard (BR-06 & BR-07 Compliant)
+    if (userRole === 'Principal') {
+        const compScore = principalHealth?.current?.compositeScore || 50;
+        const breakdown = principalHealth?.current?.dimensionBreakdown || {};
+
+        return (
+            <div className="min-h-screen bg-[#fafafa] flex flex-col text-gray-900 font-sans p-8 md:p-12 max-w-7xl mx-auto w-full space-y-8">
+                {/* Header */}
+                <div className="flex justify-between items-center pb-6 border-b border-gray-200">
+                    <div>
+                        <span className="text-[10px] font-extrabold text-blue-600 tracking-wider uppercase">PORTAL KEPALA SEKOLAH</span>
+                        <h2 className="text-2xl font-black text-gray-900 tracking-tight mt-1">
+                            {principalSchool?.name || 'Sekolah Anda'}
+                        </h2>
+                        <span className="text-xs text-gray-400 font-medium">NPSN: {principalSchool?.npsn || '...'} | {principalSchool?.district || '...'}</span>
+                    </div>
+                    <button
+                        onClick={handleLogout}
+                        className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold px-4 py-2 rounded-xl text-xs transition shadow-sm"
+                    >
+                        Keluar Sesi ({userName})
+                    </button>
+                </div>
+
+                {/* Main Stats Row */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Radial Health Indicator */}
+                    <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm flex flex-col items-center justify-center space-y-6">
+                        <span className="text-[10px] font-bold text-gray-400 tracking-wider uppercase">SKOR KESEHATAN SEKOLAH</span>
+                        
+                        <div className="relative w-40 h-40 flex items-center justify-center">
+                            {/* Simple circular gauge */}
+                            <svg className="w-full h-full transform -rotate-90">
+                                <circle cx="80" cy="80" r="70" stroke="#f3f4f6" strokeWidth="8" fill="transparent" />
+                                <circle 
+                                    cx="80" 
+                                    cy="80" 
+                                    r="70" 
+                                    stroke="#3b82f6" 
+                                    strokeWidth="8" 
+                                    fill="transparent" 
+                                    strokeDasharray={`${2 * Math.PI * 70}`}
+                                    strokeDashoffset={`${2 * Math.PI * 70 * (1 - compScore / 100)}`}
+                                />
+                            </svg>
+                            <div className="absolute text-center">
+                                <span className="text-4xl font-black text-gray-900">{compScore.toFixed(0)}</span>
+                                <span className="block text-[10px] font-bold text-gray-400">KOMPOSIT</span>
+                            </div>
+                        </div>
+
+                        <span className="text-[10px] font-bold text-gray-400 text-center leading-relaxed">
+                            Diperbarui dinamis berdasarkan 9 aspek survey berkala orang tua dan indikator resmi Dapodik.
+                        </span>
+                    </div>
+
+                    {/* Dimension Breakdown */}
+                    <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-6">
+                        <h3 className="text-sm font-bold text-gray-800 tracking-tight">Rincian Skor Per Dimensi</h3>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {[
+                                { key: 'academic', label: 'Dimensi Akademik', score: breakdown.academic || 50 },
+                                { key: 'teacher', label: 'Dimensi Guru & Tenaga GTK', score: breakdown.teacher || 50 },
+                                { key: 'infrastructure', label: 'Dimensi Sarpras & Toilet', score: breakdown.infrastructure || 50 },
+                                { key: 'finance', label: 'Dimensi Transparansi Keuangan', score: breakdown.finance || 50 },
+                                { key: 'studentWelfare', label: 'Keamanan (Safety & Bullying)', score: breakdown.studentWelfare || 50 },
+                                { key: 'parentSatisfaction', label: 'Kepuasan Ulasan Orang Tua', score: breakdown.parentSatisfaction || 50 }
+                            ].map(d => (
+                                <div key={d.key} className="bg-gray-50 p-4 rounded-xl border border-gray-150 space-y-2">
+                                    <div className="flex justify-between items-center text-xs font-bold">
+                                        <span className="text-gray-700">{d.label}</span>
+                                        <span className="text-blue-600">{Number(d.score).toFixed(0)}</span>
+                                    </div>
+                                    <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                        <div className="h-full bg-blue-600" style={{ width: `${d.score}%` }} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Ground Truth Warning Flags */}
+                <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4">
+                    <h3 className="text-sm font-bold text-gray-800 tracking-tight">Inkonsistensi Data (Ground Truth Flags)</h3>
+                    
+                    {principalFlags.length > 0 ? (
+                        <div className="space-y-3">
+                            {principalFlags.map(f => (
+                                <div key={f.flag_id} className="bg-red-50 border border-red-150 p-4 rounded-xl flex items-start gap-3">
+                                    <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5 shrink-0" />
+                                    <div>
+                                        <span className="block text-xs font-bold text-red-800 uppercase tracking-wide">FLAGS: DISKREPANSI {f.indicator.toUpperCase()}</span>
+                                        <p className="text-xs text-red-700 mt-1 leading-relaxed">
+                                            Dapodik mencatat nilai tinggi ({f.official_value}%), namun survei rating orang tua hanya mendeteksi ({f.parent_value}%). Gaps deviasi sebesar {f.gap_score.toFixed(1)} standard deviations.
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-emerald-50 border border-emerald-150 p-4 rounded-xl flex items-center gap-3">
+                            <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />
+                            <span className="text-xs font-bold text-emerald-800">
+                                Tidak ada inkonsistensi signifikan terdeteksi. Data Dapodik sejalan dengan persepsi nyata orang tua.
+                            </span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Complaints Section & Response (BR-07 compliant: no parent identity exposed) */}
+                <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-6">
+                    <h3 className="text-sm font-bold text-gray-800 tracking-tight">
+                        Pengaduan Masuk Sekolah & Tindak Lanjut
+                    </h3>
+
+                    {complaints.length > 0 ? (
+                        <div className="space-y-6">
+                            {complaints.map(c => (
+                                <div key={c.complaint_id} className="bg-gray-50 border border-gray-150 p-6 rounded-2xl flex flex-col md:flex-row justify-between gap-6">
+                                    <div className="space-y-2 flex-1">
+                                        <div className="flex gap-3 items-center">
+                                            <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-600 font-extrabold text-[9px] uppercase">{c.category}</span>
+                                            <span className={`px-2 py-0.5 rounded text-[8px] font-bold ${c.urgency === 'Critical' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-400'}`}>
+                                                URGENSI: {c.urgency.toUpperCase()}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-gray-800 font-medium leading-relaxed">{c.text}</p>
+                                        <span className="block text-[9px] text-gray-400 pt-2">Masuk: {new Date(c.created_at).toLocaleString('id-ID')}</span>
+                                    </div>
+
+                                    {/* Action Form */}
+                                    <div className="w-full md:w-56 shrink-0 flex flex-col justify-center space-y-3">
+                                        <div>
+                                            <label className="block text-[9px] font-bold text-gray-400 uppercase mb-1">Status Pengaduan</label>
+                                            <select
+                                                value={newStatusValue[c.complaint_id] || c.status}
+                                                onChange={e => setNewStatusValue({
+                                                    ...newStatusValue,
+                                                    [c.complaint_id]: e.target.value
+                                                })}
+                                                disabled={c.status === 'Resolved'}
+                                                className="w-full bg-white border border-gray-200 focus:border-blue-500 text-gray-900 px-3 py-2 rounded-lg outline-none text-xs"
+                                            >
+                                                <option value="Received">Received</option>
+                                                <option value="Acknowledged">Acknowledged</option>
+                                                <option value="In Progress">In Progress</option>
+                                                <option value="Resolved">Resolved</option>
+                                            </select>
+                                        </div>
+                                        {c.status !== 'Resolved' && (
+                                            <button
+                                                onClick={() => handleUpdateComplaintStatus(c.complaint_id)}
+                                                disabled={updatingComplaintId === c.complaint_id}
+                                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-bold py-2 rounded-lg transition duration-150 text-[10px] shadow-sm"
+                                            >
+                                                {updatingComplaintId === c.complaint_id ? 'Menyimpan...' : 'Perbarui Status'}
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 text-xs text-gray-400">
+                            Belum ada pengaduan terdaftar untuk sekolah Anda pada bulan ini.
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    // Authenticated Dinas Analyst / Supervisor Dashboard View
     return (
         <div className="min-h-screen bg-[#fafafa] flex flex-col md:flex-row text-gray-900 font-sans">
             {/* Sidebar Navigation */}
@@ -389,13 +648,15 @@ export default function DinasDashboard() {
                         <LayoutDashboard className="w-4 h-4" />
                         RINGKASAN & PETA RISIKO
                     </button>
-                    <button
-                        onClick={() => setActiveTab('simulation')}
-                        className={`flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl transition duration-150 ${activeTab === 'simulation' ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
-                    >
-                        <Calculator className="w-4 h-4" />
-                        SIMULASI KEBIJAKAN
-                    </button>
+                    {userRole !== 'Supervisor' && (
+                        <button
+                            onClick={() => setActiveTab('simulation')}
+                            className={`flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl transition duration-150 ${activeTab === 'simulation' ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
+                        >
+                            <Calculator className="w-4 h-4" />
+                            SIMULASI KEBIJAKAN
+                        </button>
+                    )}
                     <button
                         onClick={() => setActiveTab('recommendations')}
                         className={`flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl transition duration-150 ${activeTab === 'recommendations' ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
@@ -403,13 +664,15 @@ export default function DinasDashboard() {
                         <ShieldAlert className="w-4 h-4" />
                         REKOMENDASI & ALERTS
                     </button>
-                    <button
-                        onClick={() => setActiveTab('complaints')}
-                        className={`flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl transition duration-150 ${activeTab === 'complaints' ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
-                    >
-                        <FileText className="w-4 h-4" />
-                        PENGADUAN MASUK (AI)
-                    </button>
+                    {userRole !== 'Supervisor' && (
+                        <button
+                            onClick={() => setActiveTab('complaints')}
+                            className={`flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl transition duration-150 ${activeTab === 'complaints' ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
+                        >
+                            <FileText className="w-4 h-4" />
+                            PENGADUAN MASUK (AI)
+                        </button>
+                    )}
                 </nav>
 
                 <div className="pt-6 border-t border-gray-150 flex justify-between items-center">
@@ -459,7 +722,6 @@ export default function DinasDashboard() {
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden p-6 space-y-4">
                                 <h3 className="text-sm font-bold text-gray-800 tracking-tight">Sebaran Geografis Titik Sekolah</h3>
-                                {/* Leaflet Map Container */}
                                 <div id="map-container" className="h-96 rounded-xl border border-gray-150 z-10"></div>
                             </div>
 
