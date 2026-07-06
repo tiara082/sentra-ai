@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+
+# Build outputs
+dist/
+backend/dist/
+
+# Local configuration / secrets
+.env
+backend/.env
+
+# Local machine learning models cache / generated models
+backend/models/
+.onnx/
+
+# Logs
+*.log
+backend/*.log
+
+# IDE files
+.vscode/
+.idea/
+.DS_Store
