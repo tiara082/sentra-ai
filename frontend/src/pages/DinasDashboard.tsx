@@ -811,7 +811,7 @@ export default function DinasDashboard() {
                                         <div className="flex flex-col sm:flex-row gap-6 items-center">
                                             <div className="bg-gray-50 border border-gray-150 p-6 rounded-2xl text-center flex-1 w-full">
                                                 <span className="text-[10px] font-bold text-gray-400 tracking-wider uppercase">SKOR AWAL</span>
-                                                <div className="text-4xl font-black text-gray-400 mt-2">{simResult.originalCompositeScore.toFixed(2)}</div>
+                                                <div className="text-4xl font-black text-gray-400 mt-2">{simResult.originalComposite.toFixed(2)}</div>
                                             </div>
                                             <ArrowRight className="w-6 h-6 text-gray-300 hidden sm:block" />
                                             <div className="bg-blue-50 border border-blue-150 p-6 rounded-2xl text-center flex-1 w-full">

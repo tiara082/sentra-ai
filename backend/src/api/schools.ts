@@ -54,9 +54,20 @@ router.get('/:id/health-score', authenticateStaff, async (req: AuthenticatedRequ
 router.get(
     '/:id/ground-truth-flags', 
     authenticateStaff, 
-    requireRoles(['Admin', 'Dinas Analyst', 'Supervisor']), 
     async (req: AuthenticatedRequest, res: Response) => {
+        const user = req.user!;
         const schoolId = req.params.id;
+
+        // BR-06: Principal can only view their own school's data
+        if (user.role === 'Principal' && user.districtScope !== schoolId) {
+            return res.status(403).json({ error_code: 'FORBIDDEN', message: 'Access denied: you can only view your own school' });
+        }
+
+        const allowedRoles = ['Admin', 'Dinas Analyst', 'Supervisor', 'Principal'];
+        if (!allowedRoles.includes(user.role)) {
+            return res.status(403).json({ error_code: 'FORBIDDEN', message: 'Access denied: invalid role' });
+        }
+
         const { period } = req.query;
 
         try {
