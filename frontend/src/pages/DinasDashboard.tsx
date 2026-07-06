@@ -434,15 +434,15 @@ export default function DinasDashboard() {
                         <div className="text-[10px] text-gray-600 leading-relaxed font-mono space-y-2">
                             <div>
                                 <span className="text-gray-900 font-bold block">1. Analis Dinas (Akses Penuh Peta & Simulasi)</span>
-                                Email: bu_rina@edupolicy.go.id<br/>Sandi: password123
+                                Email: bu_rina@edupolicy.go.id<br/>Sandi: Password123
                             </div>
                             <div>
                                 <span className="text-gray-900 font-bold block">2. Pengawas (Tindak Lanjut Alert Lapangan)</span>
-                                Email: pak_herman@edupolicy.go.id<br/>Sandi: password123
+                                Email: pak_herman@edupolicy.go.id<br/>Sandi: Password123
                             </div>
                             <div>
                                 <span className="text-gray-900 font-bold block">3. Kepala Sekolah (Hanya SDN Lowokwaru 1 & Ubah Status)</span>
-                                Email: bu_sari@edupolicy.go.id<br/>Sandi: password123
+                                Email: bu_sari@edupolicy.go.id<br/>Sandi: Password123
                             </div>
                         </div>
                     </div>
