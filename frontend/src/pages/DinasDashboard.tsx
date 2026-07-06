@@ -361,7 +361,7 @@ export default function DinasDashboard() {
         setTraining(true);
         setTrainingLogs('Menghubungi server pelatihan AI...');
         try {
-            const data = await fetchAPI('/data-integration/train', { method: 'POST' });
+            const data = await fetchAPI('/admin/train', { method: 'POST' });
             setTrainingLogs(JSON.stringify(data, null, 2));
             loadComplaints();
         } catch (err: any) {
