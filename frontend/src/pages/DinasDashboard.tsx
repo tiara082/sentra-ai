@@ -654,7 +654,7 @@ export default function DinasDashboard() {
                         <Calculator className="w-4 h-4" />
                     </div>
                     <div>
-                        <h1 className="text-sm font-bold tracking-tight">EduPolicy Lab AI</h1>
+                        <h1 className="text-sm font-bold tracking-tight">SENTRA-AI</h1>
                         <span className="text-[10px] text-gray-400 font-medium">KABUPATEN MALANG</span>
                     </div>
                 </div>
