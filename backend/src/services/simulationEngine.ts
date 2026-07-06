@@ -1,9 +1,11 @@
 import { query } from '../db';
 import { config } from '../config';
 import { calculateSchoolHealthScore, DimensionBreakdown } from './healthScore';
+import { getSimulationRationaleLLM } from './aiLLMService';
 
 export interface SimulationResult {
     schoolId: string;
+    schoolName?: string;
     interventionType: string;
     magnitude: number;
     originalComposite: number;
@@ -46,16 +48,12 @@ export async function runPolicySimulation(
     }
 
     // 2. Define coefficients and assumptions
-    let coefficientBasis = '';
-    let assumption = '';
     
     // Copy the original breakdown to project
     const projectedMin = { ...originalBreakdown };
     const projectedMax = { ...originalBreakdown };
 
     if (interventionType === 'add_teachers') {
-        // Magnitude = number of teachers added (e.g. 2)
-        // Dynamic coefficient: larger impact if the current score is low (diminishing marginal returns)
         const currentScore = originalBreakdown.teacher !== null ? originalBreakdown.teacher : 50;
         const deficiency = 100 - currentScore;
         const baseIncrease = magnitude * deficiency * 0.08;
@@ -65,29 +63,19 @@ export async function runPolicySimulation(
         if (projectedMin.teacher !== null) projectedMin.teacher = Math.min(100, projectedMin.teacher + minIncrease);
         if (projectedMax.teacher !== null) projectedMax.teacher = Math.min(100, projectedMax.teacher + maxIncrease);
 
-        coefficientBasis = `Dynamic scaling: magnitude * (100 - currentTeacherScore) * 0.08 per teacher added (uncertainty range ±20%).`;
-        assumption = `Adding teachers improves the student-to-teacher ratio and reduces class coverage gaps, leading to improved satisfaction and teacher attendance metrics.`;
-
     } else if (interventionType === 'increase_bos') {
-        // Magnitude = percentage increase in BOS funding (e.g. 15 for 15%)
         const currentScore = originalBreakdown.finance !== null ? originalBreakdown.finance : 50;
         const deficiency = 100 - currentScore;
         const baseIncrease = magnitude * deficiency * 0.015;
         const minIncrease = Math.min(20, baseIncrease * 0.7);
         const maxIncrease = Math.min(20, baseIncrease * 1.3);
 
-        // Affects finance and academic dimensions
         if (projectedMin.finance !== null) projectedMin.finance = Math.min(100, projectedMin.finance + minIncrease);
         if (projectedMax.finance !== null) projectedMax.finance = Math.min(100, projectedMax.finance + maxIncrease);
         if (projectedMin.academic !== null) projectedMin.academic = Math.min(100, projectedMin.academic + (minIncrease * 0.5));
         if (projectedMax.academic !== null) projectedMax.academic = Math.min(100, projectedMax.academic + (maxIncrease * 0.5));
 
-        coefficientBasis = `Dynamic scaling: magnitude * (100 - currentFinanceScore) * 0.015 on Finance and 50% of that on Academic per 1% BOS funding increase (uncertainty range ±30%).`;
-        assumption = `Increased operational funding (BOS) reduces the pressure to collect informal fees and provides budget for better learning facilities, classroom resources, and activities.`;
-
     } else if (interventionType === 'infrastructure_investment') {
-        // Magnitude = IDR amount invested (e.g. 50,000,000)
-        // Normalize by 1,000,000 IDR (e.g. 50 million -> 50)
         const normalizedMag = magnitude / 1000000;
         const currentScore = originalBreakdown.infrastructure !== null ? originalBreakdown.infrastructure : 50;
         const deficiency = 100 - currentScore;
@@ -95,14 +83,10 @@ export async function runPolicySimulation(
         const minIncrease = Math.min(25, baseIncrease * 0.6);
         const maxIncrease = Math.min(25, baseIncrease * 1.4);
 
-        // Affects infrastructure and student welfare (safety)
         if (projectedMin.infrastructure !== null) projectedMin.infrastructure = Math.min(100, projectedMin.infrastructure + minIncrease);
         if (projectedMax.infrastructure !== null) projectedMax.infrastructure = Math.min(100, projectedMax.infrastructure + maxIncrease);
         if (projectedMin.studentWelfare !== null) projectedMin.studentWelfare = Math.min(100, projectedMin.studentWelfare + (minIncrease * 0.3));
         if (projectedMax.studentWelfare !== null) projectedMax.studentWelfare = Math.min(100, projectedMax.studentWelfare + (maxIncrease * 0.3));
-
-        coefficientBasis = `Dynamic scaling: (investment / 1,000,000) * (100 - currentInfrastructureScore) * 0.005 on Infrastructure and 30% of that on Student Welfare per 1,000,000 IDR invested (uncertainty range ±40%).`;
-        assumption = `Direct infrastructure capital injection enables the school to repair damaged roofs, upgrade sanitation, and secure dangerous perimeter fences.`;
     }
 
     // 3. Compute projected composite scores
@@ -133,8 +117,30 @@ export async function runPolicySimulation(
     const projectedCompositeMin = weightSum > 0 ? parseFloat((minWeightedSum / weightSum).toFixed(2)) : 0;
     const projectedCompositeMax = weightSum > 0 ? parseFloat((maxWeightedSum / weightSum).toFixed(2)) : 0;
 
+    // Fetch School Name for LLM Context
+    let schoolName = 'Sekolah';
+    try {
+        const sQuery = await query('SELECT name FROM schools WHERE school_id = $1', [schoolId]);
+        if (sQuery.rows.length > 0) {
+            schoolName = sQuery.rows[0].name;
+        }
+    } catch (e) {
+        console.error(e);
+    }
+
+    // Call the universal AI LLM service for rationale & assumption
+    const { rationale, assumption } = await getSimulationRationaleLLM(
+        schoolName,
+        interventionType,
+        magnitude,
+        originalComposite,
+        projectedCompositeMin,
+        projectedCompositeMax
+    );
+
     return {
         schoolId,
+        schoolName,
         interventionType,
         magnitude,
         originalComposite,
@@ -143,7 +149,7 @@ export async function runPolicySimulation(
         originalBreakdown,
         projectedBreakdownMin: projectedMin,
         projectedBreakdownMax: projectedMax,
-        coefficientBasis,
+        coefficientBasis: rationale,
         assumption
     };
 }

@@ -1,7 +1,8 @@
 import { query, transaction } from '../db';
-import { classifyComplaint, analyzeSentiment, determineUrgency, detectDuplicate } from '../services/aiComplaints';
+import { detectDuplicate } from '../services/aiComplaints';
 import { dispatchSupervisorNotification } from '../services/notificationService';
 import { calculateParentTrust } from '../services/trustScore';
+import { analyzeComplaintLLM } from '../services/aiLLMService';
 
 interface AIJob {
     complaintId: string;
@@ -30,11 +31,16 @@ class AIProcessingQueue {
         try {
             console.log(`[AI Queue] Processing job for complaint ID: ${job.complaintId}`);
             
-            // Run AI Complaint Intelligence pipeline
-            const { category, confidence } = await classifyComplaint(job.text);
-            const { sentiment, score: sentimentScore } = await analyzeSentiment(job.text);
-            const { urgency, explanation: urgencyExplanation } = await determineUrgency(job.text, category, job.schoolId);
-            const { isDuplicate, duplicateOfId } = await detectDuplicate(job.text, job.schoolId, category);
+            // Get school name for context
+            let schoolName = 'Sekolah';
+            const schoolRes = await query('SELECT name FROM schools WHERE school_id = $1', [job.schoolId]);
+            if (schoolRes.rows.length > 0) {
+                schoolName = schoolRes.rows[0].name;
+            }
+
+            // Run AI Complaint Intelligence pipeline (LLM + local fallbacks)
+            const enrichment = await analyzeComplaintLLM(job.text, schoolName);
+            const { isDuplicate, duplicateOfId } = await detectDuplicate(job.text, job.schoolId, enrichment.category);
 
             await transaction(async (client) => {
                 // 1. Update Complaint with computed AI values
@@ -42,15 +48,15 @@ class AIProcessingQueue {
                     `UPDATE complaints 
                      SET category = $1, urgency = $2, sentiment = $3
                      WHERE complaint_id = $4`,
-                    [category, urgency, sentiment, job.complaintId]
+                    [enrichment.category, enrichment.urgency, enrichment.sentiment, job.complaintId]
                 );
 
-                // 2. Update AI Metadata
+                // 2. Update AI Metadata (including explanation and suggested_response)
                 await client.query(
                     `UPDATE complaint_ai_metadata
-                     SET confidence = $1, duplicate_of_id = $2
-                     WHERE complaint_id = $3`,
-                    [confidence, duplicateOfId, job.complaintId]
+                     SET confidence = 0.95, duplicate_of_id = $1, explanation = $2, suggested_response = $3
+                     WHERE complaint_id = $4`,
+                    [duplicateOfId, enrichment.explanation, enrichment.suggestedResponse, job.complaintId]
                 );
 
                 // 3. Trigger alert for Critical urgency reports immediately (BR-03)

@@ -112,6 +112,8 @@ router.get('/', authenticateStaff, async (req: AuthenticatedRequest, res: Respon
             am.confidence,
             am.duplicate_of_id,
             am.review_status,
+            am.explanation,
+            am.suggested_response,
             -- Expose parent details ONLY to Supervisor/Dinas-level roles with logged access (handled via security / BR-07)
             CASE WHEN $1 IN ('Admin', 'Dinas Analyst', 'Supervisor') THEN c.parent_id ELSE NULL END as parent_id
         FROM complaints c

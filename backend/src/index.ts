@@ -51,9 +51,23 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
     });
 });
 
+import { query } from './db';
+
 // Start the server
-const server = app.listen(config.port, () => {
+const server = app.listen(config.port, async () => {
     console.log(`EduPolicy Lab AI Backend running on port ${config.port}`);
+    
+    // Auto-migrate schema updates safely
+    try {
+        await query(`
+            ALTER TABLE complaint_ai_metadata 
+            ADD COLUMN IF NOT EXISTS explanation TEXT,
+            ADD COLUMN IF NOT EXISTS suggested_response TEXT
+        `);
+        console.log('[DB] complaint_ai_metadata columns initialized successfully.');
+    } catch (e) {
+        console.error('[DB] Failed to initialize new columns:', e);
+    }
 });
 
 export default app;

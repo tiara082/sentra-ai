@@ -41,6 +41,8 @@ interface Complaint {
     sentiment: string;
     status: string;
     created_at: string;
+    explanation?: string;
+    suggested_response?: string;
 }
 
 interface School {
@@ -583,6 +585,20 @@ export default function DinasDashboard() {
                                             </span>
                                         </div>
                                         <p className="text-xs text-gray-800 font-medium leading-relaxed">{c.text}</p>
+                                        
+                                        {c.explanation && (
+                                            <div className="bg-blue-50/50 border-l-2 border-blue-400 p-2.5 rounded-r-lg text-[10px] text-blue-800 leading-relaxed">
+                                                <strong>💡 Analisis AI:</strong> {c.explanation}
+                                            </div>
+                                        )}
+                                        
+                                        {c.suggested_response && (
+                                            <div className="bg-gray-100/70 border border-gray-200 p-3 rounded-lg text-[10px] text-gray-700 leading-relaxed font-mono space-y-1">
+                                                <strong className="text-gray-900 block font-sans">📝 Rekomendasi Draf Tanggapan Empati:</strong>
+                                                <p className="whitespace-pre-wrap">{c.suggested_response}</p>
+                                            </div>
+                                        )}
+
                                         <span className="block text-[9px] text-gray-400 pt-2">Masuk: {new Date(c.created_at).toLocaleString('id-ID')}</span>
                                     </div>
 
@@ -1004,6 +1020,19 @@ export default function DinasDashboard() {
                                             </span>
                                         </div>
                                         <p className="text-xs text-gray-800 leading-relaxed font-medium">{c.text}</p>
+
+                                        {c.explanation && (
+                                            <div className="bg-blue-50/50 border-l-2 border-blue-400 p-2.5 rounded-r-lg text-[10px] text-blue-800 leading-relaxed mt-2">
+                                                <strong>💡 Analisis AI:</strong> {c.explanation}
+                                            </div>
+                                        )}
+
+                                        {c.suggested_response && (
+                                            <div className="bg-gray-50 border border-gray-150 p-3 rounded-lg text-[10px] text-gray-600 leading-relaxed font-mono mt-2 space-y-1">
+                                                <strong className="text-gray-800 block font-sans">📝 Rekomendasi Draf Tanggapan Empati:</strong>
+                                                <p className="whitespace-pre-wrap">{c.suggested_response}</p>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="pt-4 border-t border-gray-100 flex justify-between items-center text-[10px] text-gray-400 font-semibold">
