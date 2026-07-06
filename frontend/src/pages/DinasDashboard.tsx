@@ -8,15 +8,18 @@ import {
 } from 'lucide-react';
 
 interface Recommendation {
-    schoolId: string;
-    schoolName: string;
+    recommendation_id: string;
+    school_id: string;
+    school_name: string;
     district: string;
-    clusterId: number;
-    compositeScore: number;
+    cluster_id: number;
     rank: number;
-    recommendedIntervention: string;
     rationale: string;
-    priorityScore: number;
+    score_components: {
+        priorityScore: number;
+        compositeScore: number;
+        recommendedIntervention: string;
+    };
 }
 
 interface AlertItem {
@@ -874,16 +877,23 @@ export default function DinasDashboard() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-150">
-                                    {recs.map(r => (
-                                        <tr key={r.schoolId} className="hover:bg-gray-50/50">
-                                            <td className="p-4 text-center font-bold text-blue-600">{r.rank}</td>
-                                            <td className="p-4 font-bold text-gray-900">{r.schoolName}</td>
-                                            <td className="p-4 text-gray-500">{r.district}</td>
-                                            <td className="p-4 text-center font-medium">{r.compositeScore.toFixed(0)}/100</td>
-                                            <td className="p-4 font-semibold text-gray-800">{r.recommendedIntervention}</td>
-                                            <td className="p-4 text-gray-500 max-w-xs leading-relaxed">{r.rationale}</td>
-                                        </tr>
-                                    ))}
+                                    {recs.map(r => {
+                                        const compScore = r.score_components?.compositeScore !== undefined 
+                                            ? Number(r.score_components.compositeScore) 
+                                            : 0;
+                                        const intervention = r.score_components?.recommendedIntervention || 'N/A';
+                                        
+                                        return (
+                                            <tr key={r.recommendation_id} className="hover:bg-gray-50/50">
+                                                <td className="p-4 text-center font-bold text-blue-600">{r.rank}</td>
+                                                <td className="p-4 font-bold text-gray-900">{r.school_name}</td>
+                                                <td className="p-4 text-gray-500">{r.district}</td>
+                                                <td className="p-4 text-center font-medium">{compScore.toFixed(0)}/100</td>
+                                                <td className="p-4 font-semibold text-gray-800">{intervention}</td>
+                                                <td className="p-4 text-gray-500 max-w-xs leading-relaxed">{r.rationale}</td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
