@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchAPI } from '../utils/api';
-import { CheckCircle, ShieldCheck, ChevronRight } from 'lucide-react';
+import { CheckCircle, ChevronRight } from 'lucide-react';
+import logoSentraAI from '../assets/SENTRAI.png';
 
 interface School {
     school_id: string;
@@ -145,12 +146,10 @@ export default function ParentPortal() {
     // Unregistered state UI
     if (!token) {
         return (
-            <div className="min-h-screen bg-[#fafafa] flex items-center justify-center p-4">
-                <div className="bg-white max-w-md w-full border border-gray-200 rounded-2xl shadow-sm p-8">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex items-center justify-center p-4">
+                <div className="bg-white max-w-md w-full border border-slate-100 rounded-2xl shadow-[0_8px_40px_-8px_rgba(15,23,42,0.12),0_0_0_1px_rgba(15,23,42,0.04)] p-8">
                     <div className="flex flex-col items-center mb-8">
-                        <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4">
-                            <ShieldCheck className="w-6 h-6" />
-                        </div>
+                        <img src={logoSentraAI} alt="SENTRA-AI Logo" className="h-16 w-auto object-contain mb-4" />
                         <h2 className="text-2xl font-bold text-gray-900 font-display">Portal Orang Tua</h2>
                         <p className="text-sm text-gray-500 text-center mt-2">
                             Suara Anda membantu pembenahan kualitas pendidikan di Jawa Timur. Laporan Anda dijamin aman & rahasia.
@@ -158,8 +157,9 @@ export default function ParentPortal() {
                     </div>
 
                     {registrationError && (
-                        <div className="bg-red-50 border border-red-200 text-red-700 text-sm p-4 rounded-xl mb-6">
-                            {registrationError}
+                        <div className="bg-red-50/80 border border-red-200/80 text-red-700 text-sm p-4 rounded-xl mb-6 flex items-start gap-2">
+                            <span className="mt-0.5 shrink-0">⚠️</span>
+                            <span>{registrationError}</span>
                         </div>
                     )}
 
@@ -173,7 +173,7 @@ export default function ParentPortal() {
                                 placeholder="Contoh: 08123456789"
                                 value={phone}
                                 onChange={e => setPhone(e.target.value)}
-                                className="w-full bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white text-gray-900 px-4 py-3 rounded-xl transition duration-150 outline-none text-sm"
+                                className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 text-gray-900 px-4 py-3 rounded-xl transition-all duration-200 outline-none text-sm"
                                 required
                             />
                         </div>
@@ -185,7 +185,7 @@ export default function ParentPortal() {
                             <select
                                 value={selectedSchool}
                                 onChange={e => setSelectedSchool(e.target.value)}
-                                className="w-full bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white text-gray-900 px-4 py-3 rounded-xl transition duration-150 outline-none text-sm"
+                                className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 text-gray-900 px-4 py-3 rounded-xl transition-all duration-200 outline-none text-sm"
                                 required
                             >
                                 <option value="">-- Pilih Sekolah --</option>
@@ -197,7 +197,7 @@ export default function ParentPortal() {
                             </select>
                         </div>
 
-                        <div className="flex items-start gap-3 bg-gray-50 p-4 rounded-xl border border-gray-150">
+                        <div className="flex items-start gap-3 bg-slate-50/70 p-4 rounded-xl border border-slate-200/70">
                             <input type="checkbox" id="consent" className="mt-1" defaultChecked required />
                             <label htmlFor="consent" className="text-xs text-gray-500 leading-relaxed">
                                 Saya setuju untuk berpartisipasi dalam program penilaian kualitas sekolah secara berkala. Identitas saya dilindungi oleh UU PDP.
@@ -206,7 +206,7 @@ export default function ParentPortal() {
 
                         <button
                             type="submit"
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition duration-150 text-sm shadow-sm"
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl transition-all duration-150 text-sm btn-glow-blue"
                         >
                             Masuk & Mulai
                         </button>
@@ -218,29 +218,32 @@ export default function ParentPortal() {
 
     // Registered State PWA Container
     return (
-        <div className="min-h-screen bg-[#fafafa] flex flex-col items-center p-4">
-            <div className="max-w-md w-full flex justify-between items-center py-4 mb-2">
-                <span className="text-sm font-semibold text-gray-800">Sentra AI — PWA Portal</span>
+        <div className="min-h-screen bg-slate-50 flex flex-col items-center p-4">
+            <div className="max-w-md w-full flex justify-between items-center py-4 mb-3">
+                <div className="flex items-center gap-2.5">
+                    <img src={logoSentraAI} alt="SENTRA-AI Logo" className="h-7 w-auto object-contain" />
+                    <span className="text-sm font-semibold text-slate-800 tracking-tight">Sentra AI — Portal</span>
+                </div>
                 <button
                     onClick={handleLogout}
-                    className="text-xs text-gray-400 hover:text-gray-600 font-medium"
+                    className="text-xs text-slate-400 hover:text-slate-700 hover:bg-slate-100 font-medium px-3 py-1.5 rounded-lg transition-all duration-150"
                 >
                     Keluar Sesi
                 </button>
             </div>
 
-            <div className="bg-white max-w-md w-full border border-gray-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+            <div className="bg-white max-w-md w-full border border-slate-200/60 rounded-2xl shadow-[0_4px_24px_-4px_rgba(15,23,42,0.08),0_0_0_1px_rgba(15,23,42,0.04)] overflow-hidden flex flex-col">
                 {/* Navigation Tab Header */}
-                <div className="flex border-b border-gray-150">
+                <div className="flex border-b border-slate-100 bg-slate-50/30">
                     <button
                         onClick={() => { setMode('survey'); setSurveySuccess(false); setSurveyStep(0); }}
-                        className={`flex-1 py-4 text-sm font-medium transition duration-150 ${mode === 'survey' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                        className={`flex-1 py-3.5 text-sm font-semibold transition-all duration-150 ${mode === 'survey' ? 'border-b-2 border-blue-600 text-blue-600 bg-white' : 'text-slate-400 hover:text-slate-700 hover:bg-white/60'}`}
                     >
                         Survei Bulanan
                     </button>
                     <button
                         onClick={() => { setMode('complaint'); setComplaintRef(''); }}
-                        className={`flex-1 py-4 text-sm font-medium transition duration-150 ${mode === 'complaint' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                        className={`flex-1 py-3.5 text-sm font-semibold transition-all duration-150 ${mode === 'complaint' ? 'border-b-2 border-blue-600 text-blue-600 bg-white' : 'text-slate-400 hover:text-slate-700 hover:bg-white/60'}`}
                     >
                         Buat Aduan
                     </button>
@@ -251,11 +254,11 @@ export default function ParentPortal() {
                     {mode === 'survey' ? (
                         surveySuccess ? (
                             <div className="text-center py-8">
-                                <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_4px_16px_rgba(16,185,129,0.15)]">
                                     <CheckCircle className="w-8 h-8" />
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-900">Survei Terkirim!</h3>
-                                <p className="text-sm text-gray-500 mt-3 leading-relaxed">
+                                <h3 className="text-xl font-bold text-slate-900 tracking-tight">Survei Terkirim!</h3>
+                                <p className="text-sm text-slate-500 mt-3 leading-relaxed">
                                     Terima kasih atas partisipasi Anda. Umpan balik Anda telah kami enkripsi dan agregasikan untuk recalculation kesehatan sekolah secara langsung.
                                 </p>
                             </div>
@@ -264,21 +267,21 @@ export default function ParentPortal() {
                                 {surveyStep < surveyQuestions.length ? (
                                     <div className="space-y-8">
                                         {/* Step Progress */}
-                                        <div className="flex justify-between items-center text-xs font-semibold text-gray-400">
-                                            <span>ASPEK EVALUASI</span>
-                                            <span>{surveyStep + 1} dari {surveyQuestions.length}</span>
+                                        <div className="flex justify-between items-center text-[10px] font-semibold text-slate-400 tracking-widest uppercase">
+                                            <span>Aspek Evaluasi</span>
+                                            <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-bold">{surveyStep + 1} / {surveyQuestions.length}</span>
                                         </div>
-                                        <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+                                        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                             <div
-                                                className="h-full bg-blue-600 transition-all duration-300"
+                                                className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500 rounded-full"
                                                 style={{ width: `${((surveyStep + 1) / surveyQuestions.length) * 100}%` }}
                                             />
                                         </div>
 
                                         {/* Question Details */}
                                         <div className="space-y-2">
-                                            <h4 className="text-lg font-bold text-gray-900">{surveyQuestions[surveyStep].label}</h4>
-                                            <p className="text-sm text-gray-500 leading-relaxed">{surveyQuestions[surveyStep].desc}</p>
+                                            <h4 className="text-lg font-bold text-slate-900 tracking-tight">{surveyQuestions[surveyStep].label}</h4>
+                                            <p className="text-sm text-slate-500 leading-relaxed">{surveyQuestions[surveyStep].desc}</p>
                                         </div>
 
                                         {/* Rating Scale (1-5 Sliders) */}
@@ -294,18 +297,18 @@ export default function ParentPortal() {
                                                 })}
                                                 className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
                                             />
-                                            <div className="flex justify-between text-xs font-bold text-gray-400 px-1">
-                                                <span>1 (Sangat Buruk)</span>
-                                                <span className="text-blue-600 text-sm bg-blue-50 px-2 py-0.5 rounded-md">
-                                                    Nilai: {surveyScores[surveyQuestions[surveyStep].key]}
+                                            <div className="flex justify-between text-xs font-semibold text-slate-400 px-1">
+                                                <span>1 — Sangat Buruk</span>
+                                                <span className="text-blue-600 font-bold bg-blue-50 px-3 py-1 rounded-full text-sm shadow-sm">
+                                                    {surveyScores[surveyQuestions[surveyStep].key]} / 5
                                                 </span>
-                                                <span>5 (Sangat Baik)</span>
+                                                <span>5 — Sangat Baik</span>
                                             </div>
                                         </div>
 
                                         <button
                                             onClick={() => setSurveyStep(prev => prev + 1)}
-                                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl flex items-center justify-center gap-2 transition duration-150 text-sm shadow-sm"
+                                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-150 text-sm btn-glow-blue"
                                         >
                                             Selanjutnya <ChevronRight className="w-4 h-4" />
                                         </button>
@@ -331,16 +334,16 @@ export default function ParentPortal() {
                                             <span>{surveyComment.length}/500</span>
                                         </div>
 
-                                        <div className="flex gap-4">
+                                        <div className="flex gap-3">
                                             <button
                                                 onClick={() => setSurveyStep(0)}
-                                                className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-600 font-semibold py-3 rounded-xl transition duration-150 text-sm border border-gray-250"
+                                                className="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-600 font-semibold py-3.5 rounded-xl transition-all duration-150 text-sm border border-slate-200 active:scale-[0.98]"
                                             >
                                                 Ulangi
                                             </button>
                                             <button
                                                 onClick={handleSurveySubmit}
-                                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition duration-150 text-sm shadow-sm"
+                                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl transition-all duration-150 text-sm btn-glow-blue"
                                             >
                                                 Kirim Survei
                                             </button>
@@ -353,14 +356,14 @@ export default function ParentPortal() {
                         <div>
                             {complaintRef ? (
                                 <div className="text-center py-6">
-                                    <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                    <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_4px_16px_rgba(16,185,129,0.15)]">
                                         <CheckCircle className="w-8 h-8" />
                                     </div>
-                                    <h3 className="text-xl font-bold text-gray-900">Aduan Masuk Antrean</h3>
+                                    <h3 className="text-xl font-bold text-slate-900 tracking-tight">Aduan Masuk Antrean</h3>
                                     <p className="text-sm text-gray-500 mt-3 leading-relaxed">
                                         Laporan Anda telah berhasil dicatat. AI sedang menganalisis tingkat urgensi dan kategori secara asinkron di latar belakang.
                                     </p>
-                                    <div className="bg-gray-50 p-4 border border-gray-150 rounded-xl my-6">
+                                    <div className="bg-slate-50 p-4 border border-slate-200/70 rounded-xl my-6">
                                         <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">KODE LACAK ADUAN</span>
                                         <code className="text-sm font-bold text-gray-900 break-all select-all">{complaintRef}</code>
                                     </div>
@@ -382,7 +385,7 @@ export default function ParentPortal() {
                                             value={complaintText}
                                             onChange={e => setComplaintText(e.target.value)}
                                             rows={5}
-                                            className="w-full bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white text-gray-900 px-4 py-3 rounded-xl transition duration-150 outline-none text-sm"
+                                            className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 text-gray-900 px-4 py-3 rounded-xl transition-all duration-200 outline-none text-sm"
                                             required
                                             minLength={20}
                                             maxLength={2000}
@@ -393,7 +396,7 @@ export default function ParentPortal() {
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center justify-between p-4 bg-gray-50 border border-gray-150 rounded-xl">
+                                    <div className="flex items-center justify-between p-4 bg-slate-50/80 border border-slate-200/70 rounded-xl">
                                         <div>
                                             <label className="block text-xs font-semibold text-gray-700">Gunakan Anonimitas Penuh</label>
                                             <span className="text-[10px] text-gray-400">Pihak Dinas tidak dapat menghubungi Anda kembali.</span>
@@ -409,7 +412,7 @@ export default function ParentPortal() {
                                     <button
                                         type="submit"
                                         disabled={submittingComplaint}
-                                        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium py-3 rounded-xl transition duration-150 text-sm shadow-sm flex items-center justify-center gap-2"
+                                        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:shadow-none text-white font-semibold py-3.5 rounded-xl transition-all duration-150 text-sm btn-glow-blue flex items-center justify-center gap-2"
                                     >
                                         {submittingComplaint ? 'Sedang Memproses...' : 'Kirim Pengaduan'}
                                     </button>

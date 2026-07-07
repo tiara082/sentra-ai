@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { fetchAPI } from '../utils/api';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import logoSentraAI from '../assets/SENTRAI.png';
 import { 
     LayoutDashboard, Calculator, ShieldAlert, FileText, 
-    RefreshCw, Download, ArrowRight, ShieldCheck, CheckCircle, AlertTriangle
+    RefreshCw, Download, ArrowRight, CheckCircle, AlertTriangle
 } from 'lucide-react';
 
 interface Recommendation {
@@ -379,21 +380,20 @@ export default function DinasDashboard() {
     // Unauthenticated: Render Dinas Login Gate
     if (!token) {
         return (
-            <div className="min-h-screen bg-[#fafafa] flex items-center justify-center p-4">
-                <div className="bg-white max-w-md w-full border border-gray-200 rounded-2xl shadow-sm p-8 space-y-6">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex items-center justify-center p-4">
+                <div className="bg-white max-w-md w-full border border-slate-100 rounded-2xl shadow-[0_8px_40px_-8px_rgba(15,23,42,0.12),0_0_0_1px_rgba(15,23,42,0.04)] p-8 space-y-6">
                     <div className="flex flex-col items-center">
-                        <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4">
-                            <ShieldCheck className="w-6 h-6" />
-                        </div>
-                        <h2 className="text-2xl font-bold text-gray-900 font-display">Login Portal Pengelola</h2>
-                        <p className="text-sm text-gray-500 text-center mt-2">
+                        <img src={logoSentraAI} alt="SENTRA-AI Logo" className="h-16 w-auto object-contain mb-4" />
+                        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Login Portal Pengelola</h2>
+                        <p className="text-sm text-slate-500 text-center mt-2">
                             Masuk sesuai peran Anda (Analis Dinas, Pengawas, atau Kepala Sekolah).
                         </p>
                     </div>
 
                     {loginError && (
-                        <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-4 rounded-xl">
-                            {loginError}
+                        <div className="bg-red-50/80 border border-red-200/80 text-red-700 text-xs p-4 rounded-xl flex items-start gap-2">
+                            <span className="mt-0.5 shrink-0">⚠️</span>
+                            <span>{loginError}</span>
                         </div>
                     )}
 
@@ -407,7 +407,7 @@ export default function DinasDashboard() {
                                 placeholder="bu_rina@edupolicy.go.id"
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
-                                className="w-full bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white text-gray-900 px-4 py-3 rounded-xl transition duration-150 outline-none text-xs"
+                                className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 text-gray-900 px-4 py-3 rounded-xl transition-all duration-200 outline-none text-xs"
                                 required
                             />
                         </div>
@@ -421,33 +421,33 @@ export default function DinasDashboard() {
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
-                                className="w-full bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white text-gray-900 px-4 py-3 rounded-xl transition duration-150 outline-none text-xs"
+                                className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 text-gray-900 px-4 py-3 rounded-xl transition-all duration-200 outline-none text-xs"
                                 required
                             />
                         </div>
 
                         <button
                             type="submit"
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition duration-150 text-xs shadow-sm"
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl transition-all duration-150 text-xs btn-glow-blue"
                         >
                             Masuk Portal
                         </button>
                     </form>
 
-                    <div className="bg-blue-50 border border-blue-150 p-4 rounded-xl space-y-3">
-                        <span className="block text-[10px] font-bold text-blue-600 uppercase tracking-wider">KREDENSI DEMO INTEGRASI:</span>
-                        <div className="text-[10px] text-gray-600 leading-relaxed font-mono space-y-2">
-                            <div>
-                                <span className="text-gray-900 font-bold block">1. Analis Dinas (Akses Penuh Peta & Simulasi)</span>
-                                Email: bu_rina@edupolicy.go.id<br/>Sandi: Password123
+                    <div className="bg-slate-50 border border-slate-200/70 p-4 rounded-xl space-y-3">
+                        <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">🔑 Kredensial Demo Integrasi</span>
+                        <div className="text-[10px] text-slate-600 leading-relaxed font-mono space-y-3">
+                            <div className="p-3 bg-white rounded-lg border border-slate-200/60">
+                                <span className="text-slate-900 font-bold font-sans block mb-1">1. Analis Dinas (Akses Penuh)</span>
+                                <span className="text-slate-500">bu_rina@edupolicy.go.id &middot; Password123</span>
                             </div>
-                            <div>
-                                <span className="text-gray-900 font-bold block">2. Pengawas (Tindak Lanjut Alert Lapangan)</span>
-                                Email: pak_herman@edupolicy.go.id<br/>Sandi: Password123
+                            <div className="p-3 bg-white rounded-lg border border-slate-200/60">
+                                <span className="text-slate-900 font-bold font-sans block mb-1">2. Pengawas (Alert Lapangan)</span>
+                                <span className="text-slate-500">pak_herman@edupolicy.go.id &middot; Password123</span>
                             </div>
-                            <div>
-                                <span className="text-gray-900 font-bold block">3. Kepala Sekolah (Hanya SDN Lowokwaru 1 & Ubah Status)</span>
-                                Email: bu_sari@edupolicy.go.id<br/>Sandi: Password123
+                            <div className="p-3 bg-white rounded-lg border border-slate-200/60">
+                                <span className="text-slate-900 font-bold font-sans block mb-1">3. Kepala Sekolah</span>
+                                <span className="text-slate-500">bu_sari@edupolicy.go.id &middot; Password123</span>
                             </div>
                         </div>
                     </div>
@@ -462,19 +462,22 @@ export default function DinasDashboard() {
         const breakdown = principalHealth?.current?.dimensionBreakdown || {};
 
         return (
-            <div className="min-h-screen bg-[#fafafa] flex flex-col text-gray-900 font-sans p-8 md:p-12 max-w-7xl mx-auto w-full space-y-8">
+            <div className="min-h-screen bg-slate-50 flex flex-col text-gray-900 font-sans p-8 md:p-12 max-w-7xl mx-auto w-full space-y-8">
                 {/* Header */}
-                <div className="flex justify-between items-center pb-6 border-b border-gray-200">
-                    <div>
-                        <span className="text-[10px] font-extrabold text-blue-600 tracking-wider uppercase">PORTAL KEPALA SEKOLAH</span>
-                        <h2 className="text-2xl font-black text-gray-900 tracking-tight mt-1">
-                            {principalSchool?.name || 'Sekolah Anda'}
-                        </h2>
-                        <span className="text-xs text-gray-400 font-medium">NPSN: {principalSchool?.npsn || '...'} | {principalSchool?.district || '...'}</span>
+                <div className="flex justify-between items-center pb-6 border-b border-slate-200/70">
+                    <div className="flex items-center gap-4">
+                        <img src={logoSentraAI} alt="SENTRA-AI Logo" className="h-12 w-auto object-contain" />
+                        <div>
+                            <span className="text-[10px] font-bold text-blue-600 tracking-widest uppercase bg-blue-50 px-2.5 py-1 rounded-full">Portal Kepala Sekolah</span>
+                            <h2 className="text-2xl font-black text-slate-900 tracking-tight mt-3">
+                                {principalSchool?.name || 'Sekolah Anda'}
+                            </h2>
+                            <span className="text-xs text-slate-400 font-medium mt-1 block">NPSN: {principalSchool?.npsn || '...'} &middot; {principalSchool?.district || '...'}</span>
+                        </div>
                     </div>
                     <button
                         onClick={handleLogout}
-                        className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold px-4 py-2 rounded-xl text-xs transition shadow-sm"
+                        className="bg-white border border-slate-200 hover:bg-red-50 hover:border-red-200 hover:text-red-600 text-slate-600 font-semibold px-4 py-2.5 rounded-xl text-xs transition-all duration-150 shadow-sm"
                     >
                         Keluar Sesi ({userName})
                     </button>
@@ -483,129 +486,157 @@ export default function DinasDashboard() {
                 {/* Main Stats Row */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Radial Health Indicator */}
-                    <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm flex flex-col items-center justify-center space-y-6">
-                        <span className="text-[10px] font-bold text-gray-400 tracking-wider uppercase">SKOR KESEHATAN SEKOLAH</span>
+                    <div className="bg-white border border-slate-200/70 rounded-2xl p-8 shadow-[0_2px_12px_-2px_rgba(15,23,42,0.08)] flex flex-col items-center justify-center space-y-6 card-lift">
+                        <span className="text-[10px] font-semibold text-slate-400 tracking-widest uppercase">Skor Kesehatan Sekolah</span>
                         
-                        <div className="relative w-40 h-40 flex items-center justify-center">
-                            {/* Simple circular gauge */}
-                            <svg className="w-full h-full transform -rotate-90">
-                                <circle cx="80" cy="80" r="70" stroke="#f3f4f6" strokeWidth="8" fill="transparent" />
+                        <div className="relative w-44 h-44 flex items-center justify-center">
+                            {/* Circular gauge with gradient stroke */}
+                            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 180 180">
+                                <defs>
+                                    <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stopColor={compScore < 60 ? '#f87171' : compScore < 80 ? '#fbbf24' : '#34d399'} />
+                                        <stop offset="100%" stopColor={compScore < 60 ? '#ef4444' : compScore < 80 ? '#f59e0b' : '#10b981'} />
+                                    </linearGradient>
+                                </defs>
+                                <circle cx="90" cy="90" r="78" stroke="#e2e8f0" strokeWidth="10" fill="transparent" />
                                 <circle 
-                                    cx="80" 
-                                    cy="80" 
-                                    r="70" 
-                                    stroke="#3b82f6" 
-                                    strokeWidth="8" 
-                                    fill="transparent" 
-                                    strokeDasharray={`${2 * Math.PI * 70}`}
-                                    strokeDashoffset={`${2 * Math.PI * 70 * (1 - compScore / 100)}`}
+                                    cx="90" 
+                                    cy="90" 
+                                    r="78" 
+                                    stroke="url(#gaugeGradient)" 
+                                    strokeWidth="10" 
+                                    fill="transparent"
+                                    strokeLinecap="round"
+                                    strokeDasharray={`${2 * Math.PI * 78}`}
+                                    strokeDashoffset={`${2 * Math.PI * 78 * (1 - compScore / 100)}`}
+                                    style={{ transition: 'stroke-dashoffset 1s ease' }}
                                 />
                             </svg>
                             <div className="absolute text-center">
-                                <span className="text-4xl font-black text-gray-900">{compScore.toFixed(0)}</span>
-                                <span className="block text-[10px] font-bold text-gray-400">KOMPOSIT</span>
+                                <span className={`text-4xl font-black ${compScore < 60 ? 'text-red-500' : compScore < 80 ? 'text-amber-500' : 'text-emerald-600'}`}>{compScore.toFixed(0)}</span>
+                                <span className="block text-[10px] font-semibold text-slate-400 tracking-wider mt-1">/ 100</span>
                             </div>
                         </div>
 
-                        <span className="text-[10px] font-bold text-gray-400 text-center leading-relaxed">
-                            Diperbarui dinamis berdasarkan 9 aspek survey berkala orang tua dan indikator resmi Dapodik.
+                        <span className="text-[10px] text-slate-400 text-center leading-relaxed">
+                            Diperbarui dinamis dari survei orang tua &amp; data resmi Dapodik.
                         </span>
                     </div>
 
                     {/* Dimension Breakdown */}
-                    <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-6">
-                        <h3 className="text-sm font-bold text-gray-800 tracking-tight">Rincian Skor Per Dimensi</h3>
+                    <div className="lg:col-span-2 bg-white border border-slate-200/70 rounded-2xl p-6 shadow-[0_2px_12px_-2px_rgba(15,23,42,0.08)] space-y-6 card-lift">
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-800 tracking-tight">Rincian Skor Per Dimensi</h3>
+                            <p className="text-[10px] text-slate-400 mt-0.5">Dibandingkan dengan rata-rata kabupaten</p>
+                        </div>
                         
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {[
-                                { key: 'academic', label: 'Dimensi Akademik', score: breakdown.academic || 50 },
-                                { key: 'teacher', label: 'Dimensi Guru & Tenaga GTK', score: breakdown.teacher || 50 },
-                                { key: 'infrastructure', label: 'Dimensi Sarpras & Toilet', score: breakdown.infrastructure || 50 },
-                                { key: 'finance', label: 'Dimensi Transparansi Keuangan', score: breakdown.finance || 50 },
-                                { key: 'studentWelfare', label: 'Keamanan (Safety & Bullying)', score: breakdown.studentWelfare || 50 },
-                                { key: 'parentSatisfaction', label: 'Kepuasan Ulasan Orang Tua', score: breakdown.parentSatisfaction || 50 }
-                            ].map(d => (
-                                <div key={d.key} className="bg-gray-50 p-4 rounded-xl border border-gray-150 space-y-2">
-                                    <div className="flex justify-between items-center text-xs font-bold">
-                                        <span className="text-gray-700">{d.label}</span>
-                                        <span className="text-blue-600">{Number(d.score).toFixed(0)}</span>
+                                { key: 'academic', label: 'Akademik', score: breakdown.academic || 50 },
+                                { key: 'teacher', label: 'Guru & Tenaga GTK', score: breakdown.teacher || 50 },
+                                { key: 'infrastructure', label: 'Sarpras & Fasilitas', score: breakdown.infrastructure || 50 },
+                                { key: 'finance', label: 'Transparansi Keuangan', score: breakdown.finance || 50 },
+                                { key: 'studentWelfare', label: 'Keamanan & Anti-Bullying', score: breakdown.studentWelfare || 50 },
+                                { key: 'parentSatisfaction', label: 'Kepuasan Orang Tua', score: breakdown.parentSatisfaction || 50 }
+                            ].map(d => {
+                                const s = Number(d.score);
+                                const color = s < 50 ? 'text-red-500' : s < 70 ? 'text-amber-500' : 'text-emerald-600';
+                                const barColor = s < 50 ? 'from-red-400 to-red-500' : s < 70 ? 'from-amber-400 to-amber-500' : 'from-emerald-400 to-emerald-500';
+                                return (
+                                    <div key={d.key} className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/60 space-y-2.5 hover:bg-white hover:shadow-sm transition-all duration-150">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-xs font-semibold text-slate-700">{d.label}</span>
+                                            <span className={`text-sm font-bold ${color}`}>{s.toFixed(0)}</span>
+                                        </div>
+                                        <div className="h-2 bg-slate-200/70 rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full bg-gradient-to-r ${barColor} rounded-full transition-all duration-700`}
+                                                style={{ width: `${s}%` }}
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                        <div className="h-full bg-blue-600" style={{ width: `${d.score}%` }} />
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
 
                 {/* Ground Truth Warning Flags */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4">
-                    <h3 className="text-sm font-bold text-gray-800 tracking-tight">Inkonsistensi Data (Ground Truth Flags)</h3>
+                <div className="bg-white border border-slate-200/70 rounded-2xl p-6 shadow-[0_2px_12px_-2px_rgba(15,23,42,0.07)] space-y-4">
+                    <div>
+                        <p className="text-[10px] font-semibold text-slate-400 tracking-widest uppercase mb-1">Validasi Data</p>
+                        <h3 className="text-sm font-bold text-slate-800 tracking-tight">Inkonsistensi Data (Ground Truth Flags)</h3>
+                    </div>
                     
                     {principalFlags.length > 0 ? (
                         <div className="space-y-3">
                             {principalFlags.map(f => (
-                                <div key={f.flag_id} className="bg-red-50 border border-red-150 p-4 rounded-xl flex items-start gap-3">
-                                    <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5 shrink-0" />
+                                <div key={f.flag_id} className="bg-red-50/80 border border-red-200/70 p-4 rounded-xl flex items-start gap-3">
+                                    <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                                        <AlertTriangle className="w-4 h-4 text-red-500" />
+                                    </div>
                                     <div>
-                                        <span className="block text-xs font-bold text-red-800 uppercase tracking-wide">FLAGS: DISKREPANSI {f.indicator.toUpperCase()}</span>
-                                        <p className="text-xs text-red-700 mt-1 leading-relaxed">
-                                            Dapodik mencatat nilai tinggi ({f.official_value}%), namun survei rating orang tua hanya mendeteksi ({f.parent_value}%). Gaps deviasi sebesar {f.gap_score.toFixed(1)} standard deviations.
+                                        <span className="block text-xs font-bold text-red-700 tracking-wide">Diskrepansi: {f.indicator}</span>
+                                        <p className="text-xs text-red-600 mt-1 leading-relaxed">
+                                            Dapodik mencatat ({f.official_value}%) namun persepsi orang tua hanya ({f.parent_value}%). Gap: <strong>{f.gap_score.toFixed(1)}σ</strong>
                                         </p>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <div className="bg-emerald-50 border border-emerald-150 p-4 rounded-xl flex items-center gap-3">
-                            <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />
-                            <span className="text-xs font-bold text-emerald-800">
-                                Tidak ada inkonsistensi signifikan terdeteksi. Data Dapodik sejalan dengan persepsi nyata orang tua.
-                            </span>
+                        <div className="bg-emerald-50/80 border border-emerald-200/70 p-5 rounded-xl flex items-center gap-4">
+                            <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
+                                <CheckCircle className="w-5 h-5 text-emerald-600" />
+                            </div>
+                            <div>
+                                <span className="block text-xs font-bold text-emerald-800">Tidak Ada Inkonsistensi</span>
+                                <span className="text-[10px] text-emerald-700 mt-0.5 block">Data Dapodik sejalan dengan persepsi nyata orang tua.</span>
+                            </div>
                         </div>
                     )}
                 </div>
 
                 {/* Complaints Section & Response (BR-07 compliant: no parent identity exposed) */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-6">
-                    <h3 className="text-sm font-bold text-gray-800 tracking-tight">
-                        Pengaduan Masuk Sekolah & Tindak Lanjut
-                    </h3>
+                <div className="bg-white border border-slate-200/70 rounded-2xl p-6 shadow-[0_2px_12px_-2px_rgba(15,23,42,0.07)] space-y-6">
+                    <div>
+                        <p className="text-[10px] font-semibold text-slate-400 tracking-widest uppercase mb-1">Manajemen Aduan</p>
+                        <h3 className="text-sm font-bold text-slate-800 tracking-tight">Pengaduan Masuk &amp; Tindak Lanjut</h3>
+                    </div>
 
                     {complaints.length > 0 ? (
-                        <div className="space-y-6">
+                        <div className="space-y-4">
                             {complaints.map(c => (
-                                <div key={c.complaint_id} className="bg-gray-50 border border-gray-150 p-6 rounded-2xl flex flex-col md:flex-row justify-between gap-6">
-                                    <div className="space-y-2 flex-1">
-                                        <div className="flex gap-3 items-center">
-                                            <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-600 font-extrabold text-[9px] uppercase">{c.category}</span>
-                                            <span className={`px-2 py-0.5 rounded text-[8px] font-bold ${c.urgency === 'Critical' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-400'}`}>
-                                                URGENSI: {c.urgency.toUpperCase()}
+                                <div key={c.complaint_id} className="bg-slate-50/60 border border-slate-200/60 p-5 rounded-2xl flex flex-col md:flex-row justify-between gap-6 hover:bg-white hover:shadow-sm transition-all duration-200">
+                                    <div className="space-y-3 flex-1">
+                                        <div className="flex gap-2 items-center flex-wrap">
+                                            <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 font-bold text-[10px] tracking-widest uppercase">{c.category}</span>
+                                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold ${c.urgency === 'Critical' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-500'}`}>
+                                                {c.urgency}
                                             </span>
                                         </div>
-                                        <p className="text-xs text-gray-800 font-medium leading-relaxed">{c.text}</p>
+                                        <p className="text-xs text-slate-800 font-medium leading-relaxed">{c.text}</p>
                                         
                                         {c.explanation && (
-                                            <div className="bg-blue-50/50 border-l-2 border-blue-400 p-2.5 rounded-r-lg text-[10px] text-blue-800 leading-relaxed">
+                                            <div className="bg-blue-50/60 border-l-2 border-blue-400 p-3 rounded-r-lg text-[10px] text-blue-800 leading-relaxed">
                                                 <strong>💡 Analisis AI:</strong> {c.explanation}
                                             </div>
                                         )}
                                         
                                         {c.suggested_response && (
-                                            <div className="bg-gray-100/70 border border-gray-200 p-3 rounded-lg text-[10px] text-gray-700 leading-relaxed font-mono space-y-1">
-                                                <strong className="text-gray-900 block font-sans">📝 Rekomendasi Draf Tanggapan Empati:</strong>
-                                                <p className="whitespace-pre-wrap">{c.suggested_response}</p>
+                                            <div className="bg-slate-900 border border-slate-700/50 p-3.5 rounded-xl text-[10px] leading-relaxed space-y-1.5">
+                                                <strong className="text-slate-300 block font-sans tracking-wide">📝 Draf Tanggapan Empati:</strong>
+                                                <p className="whitespace-pre-wrap text-slate-400 font-mono">{c.suggested_response}</p>
                                             </div>
                                         )}
 
-                                        <span className="block text-[9px] text-gray-400 pt-2">Masuk: {new Date(c.created_at).toLocaleString('id-ID')}</span>
+                                        <span className="block text-[9px] text-slate-400 pt-1">Masuk: {new Date(c.created_at).toLocaleString('id-ID')}</span>
                                     </div>
 
                                     {/* Action Form */}
-                                    <div className="w-full md:w-56 shrink-0 flex flex-col justify-center space-y-3">
+                                    <div className="w-full md:w-52 shrink-0 flex flex-col justify-center space-y-3">
                                         <div>
-                                            <label className="block text-[9px] font-bold text-gray-400 uppercase mb-1">Status Pengaduan</label>
+                                            <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Status Pengaduan</label>
                                             <select
                                                 value={newStatusValue[c.complaint_id] || c.status}
                                                 onChange={e => setNewStatusValue({
@@ -613,7 +644,7 @@ export default function DinasDashboard() {
                                                     [c.complaint_id]: e.target.value
                                                 })}
                                                 disabled={c.status === 'Resolved'}
-                                                className="w-full bg-white border border-gray-200 focus:border-blue-500 text-gray-900 px-3 py-2 rounded-lg outline-none text-xs"
+                                                className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 text-slate-900 px-3 py-2.5 rounded-xl outline-none text-xs transition-all duration-200"
                                             >
                                                 <option value="Received">Received</option>
                                                 <option value="Acknowledged">Acknowledged</option>
@@ -625,18 +656,27 @@ export default function DinasDashboard() {
                                             <button
                                                 onClick={() => handleUpdateComplaintStatus(c.complaint_id)}
                                                 disabled={updatingComplaintId === c.complaint_id}
-                                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-bold py-2 rounded-lg transition duration-150 text-[10px] shadow-sm"
+                                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold py-2.5 rounded-xl transition-all duration-150 text-[10px] btn-glow-blue"
                                             >
                                                 {updatingComplaintId === c.complaint_id ? 'Menyimpan...' : 'Perbarui Status'}
                                             </button>
+                                        )}
+                                        {c.status === 'Resolved' && (
+                                            <div className="flex items-center gap-1.5 text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-200/70">
+                                                <CheckCircle className="w-3.5 h-3.5" /> Sudah Ditangani
+                                            </div>
                                         )}
                                     </div>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-8 text-xs text-gray-400">
-                            Belum ada pengaduan terdaftar untuk sekolah Anda pada bulan ini.
+                        <div className="flex flex-col items-center justify-center py-14 text-center">
+                            <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
+                                <CheckCircle className="w-7 h-7 text-slate-400" />
+                            </div>
+                            <p className="text-sm font-semibold text-slate-600">Tidak Ada Pengaduan</p>
+                            <p className="text-xs text-slate-400 mt-1.5 max-w-xs">Belum ada pengaduan terdaftar untuk sekolah Anda pada bulan ini.</p>
                         </div>
                     )}
                 </div>
@@ -646,62 +686,60 @@ export default function DinasDashboard() {
 
     // Authenticated Dinas Analyst / Supervisor Dashboard View
     return (
-        <div className="min-h-screen bg-[#fafafa] flex flex-col md:flex-row text-gray-900 font-sans">
+        <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row text-gray-900 font-sans">
             {/* Sidebar Navigation */}
-            <aside className="w-full md:w-64 bg-white border-r border-gray-200 flex flex-col p-6 space-y-8">
+            <aside className="w-full md:w-64 bg-white border-r border-slate-200/80 flex flex-col p-6 space-y-8 shadow-[1px_0_0_rgba(15,23,42,0.06)]">
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white">
-                        <Calculator className="w-4 h-4" />
-                    </div>
+                    <img src={logoSentraAI} alt="SENTRA-AI Logo" className="h-8 w-auto object-contain" />
                     <div>
-                        <h1 className="text-sm font-bold tracking-tight">SENTRA-AI</h1>
-                        <span className="text-[10px] text-gray-400 font-medium">KABUPATEN MALANG</span>
+                        <h1 className="text-sm font-bold tracking-tight text-slate-900">SENTRA-AI</h1>
+                        <span className="text-[10px] text-slate-400 font-medium tracking-wide">KAB. MALANG</span>
                     </div>
                 </div>
 
-                <nav className="flex-1 flex flex-col space-y-1">
+                <nav className="flex-1 flex flex-col space-y-0.5">
                     <button
                         onClick={() => setActiveTab('overview')}
-                        className={`flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl transition duration-150 ${activeTab === 'overview' ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
+                        className={`flex items-center gap-3 px-3.5 py-2.5 text-xs font-semibold rounded-xl transition-all duration-150 ${activeTab === 'overview' ? 'bg-blue-600 text-white shadow-[0_2px_8px_rgba(59,130,246,0.28)]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}
                     >
                         <LayoutDashboard className="w-4 h-4" />
-                        RINGKASAN & PETA RISIKO
+                        Ringkasan & Peta Risiko
                     </button>
                     {userRole !== 'Supervisor' && (
                         <button
                             onClick={() => setActiveTab('simulation')}
-                            className={`flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl transition duration-150 ${activeTab === 'simulation' ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
+                            className={`flex items-center gap-3 px-3.5 py-2.5 text-xs font-semibold rounded-xl transition-all duration-150 ${activeTab === 'simulation' ? 'bg-blue-600 text-white shadow-[0_2px_8px_rgba(59,130,246,0.28)]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}
                         >
                             <Calculator className="w-4 h-4" />
-                            SIMULASI KEBIJAKAN
+                            Simulasi Kebijakan
                         </button>
                     )}
                     <button
                         onClick={() => setActiveTab('recommendations')}
-                        className={`flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl transition duration-150 ${activeTab === 'recommendations' ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
+                        className={`flex items-center gap-3 px-3.5 py-2.5 text-xs font-semibold rounded-xl transition-all duration-150 ${activeTab === 'recommendations' ? 'bg-blue-600 text-white shadow-[0_2px_8px_rgba(59,130,246,0.28)]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}
                     >
                         <ShieldAlert className="w-4 h-4" />
-                        REKOMENDASI & ALERTS
+                        Rekomendasi & Alerts
                     </button>
                     {userRole !== 'Supervisor' && (
                         <button
                             onClick={() => setActiveTab('complaints')}
-                            className={`flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl transition duration-150 ${activeTab === 'complaints' ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
+                            className={`flex items-center gap-3 px-3.5 py-2.5 text-xs font-semibold rounded-xl transition-all duration-150 ${activeTab === 'complaints' ? 'bg-blue-600 text-white shadow-[0_2px_8px_rgba(59,130,246,0.28)]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}
                         >
                             <FileText className="w-4 h-4" />
-                            PENGADUAN MASUK (AI)
+                            Pengaduan Masuk (AI)
                         </button>
                     )}
                 </nav>
 
-                <div className="pt-6 border-t border-gray-150 flex justify-between items-center">
+                <div className="pt-5 border-t border-slate-100 flex justify-between items-center">
                     <div>
-                        <span className="text-[10px] text-gray-400 block font-semibold tracking-wider uppercase mb-1">ANALIS LOGIN</span>
-                        <span className="text-xs font-bold text-gray-800">{userName}</span>
+                        <span className="text-[10px] text-slate-400 block font-semibold tracking-widest uppercase mb-1">Pengguna Aktif</span>
+                        <span className="text-xs font-bold text-slate-800">{userName}</span>
                     </div>
                     <button
                         onClick={handleLogout}
-                        className="text-[10px] font-semibold text-red-500 hover:text-red-700"
+                        className="text-[10px] font-semibold text-slate-400 hover:text-red-500 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition-all duration-150"
                     >
                         Log Out
                     </button>
@@ -711,50 +749,51 @@ export default function DinasDashboard() {
             {/* Main Section */}
             <main className="flex-1 p-8 md:p-12 overflow-y-auto max-w-7xl mx-auto w-full">
                 {activeTab === 'overview' && (
-                    <div className="space-y-8">
+                    <div className="space-y-8 animate-fadein">
                         <div>
-                            <h2 className="text-3xl font-black text-gray-900 tracking-tight font-display">Ringkasan & Peta Risiko</h2>
-                            <p className="text-sm text-gray-500 mt-2">Daftar kesehatan sekolah, deteksi gap data, dan sebaran geografis sekolah di Jawa Timur.</p>
+                            <p className="text-[10px] font-semibold text-slate-400 tracking-widest uppercase mb-1">Dashboard Utama</p>
+                            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Ringkasan & Peta Risiko</h2>
+                            <p className="text-sm text-slate-500 mt-1.5">Daftar kesehatan sekolah, deteksi gap data, dan sebaran geografis sekolah di Jawa Timur.</p>
                         </div>
 
                         {/* KPI Grid */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                                <span className="text-[10px] font-bold text-gray-400 tracking-wider uppercase">RATA KESEHATAN SEKOLAH</span>
-                                <div className="text-3xl font-extrabold text-gray-900 mt-2">72.6 <span className="text-xs text-gray-400">/100</span></div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                            <div className="bg-white border border-slate-200/70 rounded-2xl p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow duration-200 border-l-4 border-l-blue-500">
+                                <span className="text-[10px] font-semibold text-slate-400 tracking-widest uppercase">Rata Kesehatan Sekolah</span>
+                                <div className="text-3xl font-extrabold text-slate-900 mt-2">72.6 <span className="text-xs text-slate-400 font-medium">/100</span></div>
                             </div>
-                            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                                <span className="text-[10px] font-bold text-gray-400 tracking-wider uppercase">PERINGATAN DINI (ACTIVE)</span>
-                                <div className="text-3xl font-extrabold text-amber-500 mt-2">{alerts.filter(a => a.status === 'Open').length} Kasus</div>
+                            <div className="bg-white border border-slate-200/70 rounded-2xl p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow duration-200 border-l-4 border-l-amber-400">
+                                <span className="text-[10px] font-semibold text-slate-400 tracking-widest uppercase">Peringatan Dini (Aktif)</span>
+                                <div className="text-3xl font-extrabold text-amber-500 mt-2">{alerts.filter(a => a.status === 'Open').length} <span className="text-xs text-slate-400 font-medium">Kasus</span></div>
                             </div>
-                            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                                <span className="text-[10px] font-bold text-gray-400 tracking-wider uppercase">ANOMALI DATA (GROUND TRUTH)</span>
-                                <div className="text-3xl font-extrabold text-red-500 mt-2">4 Sekolah</div>
+                            <div className="bg-white border border-slate-200/70 rounded-2xl p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow duration-200 border-l-4 border-l-red-400">
+                                <span className="text-[10px] font-semibold text-slate-400 tracking-widest uppercase">Anomali Data</span>
+                                <div className="text-3xl font-extrabold text-red-500 mt-2">4 <span className="text-xs text-slate-400 font-medium">Sekolah</span></div>
                             </div>
-                            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                                <span className="text-[10px] font-bold text-gray-400 tracking-wider uppercase">RESPONS ORANG TUA</span>
-                                <div className="text-3xl font-extrabold text-blue-600 mt-2">84.2%</div>
+                            <div className="bg-white border border-slate-200/70 rounded-2xl p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow duration-200 border-l-4 border-l-emerald-400">
+                                <span className="text-[10px] font-semibold text-slate-400 tracking-widest uppercase">Respons Orang Tua</span>
+                                <div className="text-3xl font-extrabold text-emerald-600 mt-2">84.2<span className="text-xs text-slate-400 font-medium">%</span></div>
                             </div>
                         </div>
 
                         {/* Map & List */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden p-6 space-y-4">
-                                <h3 className="text-sm font-bold text-gray-800 tracking-tight">Sebaran Geografis Titik Sekolah</h3>
-                                <div id="map-container" className="h-96 rounded-xl border border-gray-150 z-10"></div>
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="lg:col-span-2 bg-white border border-slate-200/70 rounded-2xl shadow-[0_2px_12px_-2px_rgba(15,23,42,0.07)] overflow-hidden p-6 space-y-4">
+                                <h3 className="text-sm font-bold text-slate-800 tracking-tight">Sebaran Geografis Titik Sekolah</h3>
+                                <div id="map-container" className="h-96 rounded-xl border border-slate-200/70 z-10"></div>
                             </div>
 
-                            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-6">
-                                <h3 className="text-sm font-bold text-gray-800 tracking-tight">Daftar NPSN Sekolah</h3>
-                                <div className="space-y-3 max-h-[380px] overflow-y-auto">
+                            <div className="bg-white border border-slate-200/70 rounded-2xl shadow-[0_2px_12px_-2px_rgba(15,23,42,0.07)] p-6 space-y-4">
+                                <h3 className="text-sm font-bold text-slate-800 tracking-tight">Daftar NPSN Sekolah</h3>
+                                <div className="space-y-2 max-h-[380px] overflow-y-auto">
                                     {schools.map(s => (
                                         <button
                                             key={s.school_id}
                                             onClick={() => setSelectedSchoolId(s.school_id)}
-                                            className={`w-full text-left p-4 rounded-xl border transition duration-150 text-xs ${selectedSchoolId === s.school_id ? 'border-blue-500 bg-blue-50' : 'border-gray-150 hover:bg-gray-50'}`}
+                                            className={`w-full text-left p-3.5 rounded-xl border transition-all duration-150 text-xs ${selectedSchoolId === s.school_id ? 'border-blue-500 bg-blue-50 shadow-[0_2px_8px_rgba(59,130,246,0.15)]' : 'border-slate-200/70 hover:bg-slate-50 hover:border-slate-300'}`}
                                         >
-                                            <span className="block font-bold text-gray-900">{s.name}</span>
-                                            <span className="text-[10px] text-gray-400 mt-1 block">NPSN: {s.npsn} | {s.district}</span>
+                                            <span className="block font-semibold text-slate-900">{s.name}</span>
+                                            <span className="text-[10px] text-slate-400 mt-0.5 block">NPSN: {s.npsn} &middot; {s.district}</span>
                                         </button>
                                     ))}
                                 </div>
@@ -764,14 +803,15 @@ export default function DinasDashboard() {
                 )}
 
                 {activeTab === 'simulation' && (
-                    <div className="space-y-8">
+                    <div className="space-y-8 animate-fadein">
                         <div>
-                            <h2 className="text-3xl font-black text-gray-900 tracking-tight font-display">Simulasi Dampak Kebijakan</h2>
-                            <p className="text-sm text-gray-500 mt-2">Uji dampak elastisitas peningkatan anggaran atau penambahan guru secara real-time.</p>
+                            <p className="text-[10px] font-semibold text-slate-400 tracking-widest uppercase mb-1">Analisis Kebijakan</p>
+                            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Simulasi Dampak Kebijakan</h2>
+                            <p className="text-sm text-slate-500 mt-1.5">Uji dampak elastisitas peningkatan anggaran atau penambahan guru secara real-time.</p>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="bg-white border border-slate-200/70 rounded-2xl shadow-[0_2px_12px_-2px_rgba(15,23,42,0.07)] p-6">
                                 <h3 className="text-sm font-bold text-gray-800 tracking-tight mb-6">Konfigurasi Intervensi</h3>
                                 <form onSubmit={handleRunSimulation} className="space-y-6">
                                     <div>
@@ -779,7 +819,7 @@ export default function DinasDashboard() {
                                         <select
                                             value={selectedSchoolId}
                                             onChange={e => setSelectedSchoolId(e.target.value)}
-                                            className="w-full bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white text-gray-900 px-4 py-3 rounded-xl transition duration-150 outline-none text-xs"
+                                            className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 text-gray-900 px-4 py-3 rounded-xl transition-all duration-200 outline-none text-xs"
                                         >
                                             {schools.map(s => (
                                                 <option key={s.school_id} value={s.school_id}>{s.name}</option>
@@ -792,7 +832,7 @@ export default function DinasDashboard() {
                                         <select
                                             value={simType}
                                             onChange={e => setSimType(e.target.value)}
-                                            className="w-full bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white text-gray-900 px-4 py-3 rounded-xl transition duration-150 outline-none text-xs"
+                                            className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 text-gray-900 px-4 py-3 rounded-xl transition-all duration-200 outline-none text-xs"
                                         >
                                             <option value="add_teachers">Penambahan Tenaga Pengajar (Guru)</option>
                                             <option value="increase_bos">Peningkatan Anggaran Operasional (BOS %)</option>
@@ -806,7 +846,7 @@ export default function DinasDashboard() {
                                             type="number"
                                             value={simMag}
                                             onChange={e => setSimMag(parseFloat(e.target.value))}
-                                            className="w-full bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white text-gray-900 px-4 py-3 rounded-xl transition duration-150 outline-none text-xs"
+                                            className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 text-gray-900 px-4 py-3 rounded-xl transition-all duration-200 outline-none text-xs"
                                             required
                                         />
                                         <span className="text-[9px] text-gray-400 mt-2 block">Masukkan jumlah guru, persentase BOS (%), atau nominal rupiah sarpras.</span>
@@ -815,14 +855,14 @@ export default function DinasDashboard() {
                                     <button
                                         type="submit"
                                         disabled={simulating}
-                                        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold py-3 rounded-xl transition duration-150 text-xs shadow-sm flex items-center justify-center gap-2"
+                                        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold py-3.5 rounded-xl transition-all duration-150 text-xs btn-glow-blue flex items-center justify-center gap-2"
                                     >
                                         {simulating ? 'Sedang Memproyeksikan...' : 'Proyeksikan Dampak'}
                                     </button>
                                 </form>
                             </div>
 
-                            <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-6">
+                            <div className="lg:col-span-2 bg-white border border-slate-200/70 rounded-2xl shadow-[0_2px_12px_-2px_rgba(15,23,42,0.07)] p-6 space-y-6">
                                 <h3 className="text-sm font-bold text-gray-800 tracking-tight">Hasil Proyeksi Real-time</h3>
                                 
                                 {simResult ? (
@@ -864,35 +904,36 @@ export default function DinasDashboard() {
                 )}
 
                 {activeTab === 'recommendations' && (
-                    <div className="space-y-8">
+                    <div className="space-y-8 animate-fadein">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div>
-                                <h2 className="text-3xl font-black text-gray-900 tracking-tight font-display">Priority Recommendations & Alerts</h2>
-                                <p className="text-sm text-gray-500 mt-2">Rangking alokasi intervensi dinas hasil perhitungan Multi-Criteria Decision Analysis.</p>
+                                <p className="text-[10px] font-semibold text-slate-400 tracking-widest uppercase mb-1">Prioritas Intervensi</p>
+                                <h2 className="text-3xl font-black text-slate-900 tracking-tight">Rekomendasi & Alerts</h2>
+                                <p className="text-sm text-slate-500 mt-1.5">Rangking alokasi intervensi dinas hasil perhitungan Multi-Criteria Decision Analysis.</p>
                             </div>
                             <a
                                 href="http://localhost:8000/api/v1/recommendations/export?period=2026-07"
                                 download
-                                className="bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 font-semibold px-4 py-2.5 rounded-xl transition duration-150 text-xs shadow-sm flex items-center gap-2 max-w-fit"
+                                className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold px-4 py-2.5 rounded-xl transition-all duration-150 text-xs shadow-sm flex items-center gap-2 max-w-fit hover:shadow-md"
                             >
                                 <Download className="w-4 h-4" /> Unduh CSV Rekomendasi
                             </a>
                         </div>
 
                         {/* Recommendations Table */}
-                        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                        <div className="bg-white border border-slate-200/70 rounded-2xl shadow-[0_2px_12px_-2px_rgba(15,23,42,0.07)] overflow-hidden">
                             <table className="w-full text-left text-xs border-collapse">
                                 <thead>
-                                    <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 font-semibold">
-                                        <th className="p-4 w-12 text-center">RANK</th>
-                                        <th className="p-4">NAMA SEKOLAH</th>
-                                        <th className="p-4">DISTRIK / KECAMATAN</th>
-                                        <th className="p-4 w-28 text-center">HEALTH SCORE</th>
-                                        <th className="p-4">REKOMENDASI INTERVENSI</th>
-                                        <th className="p-4">ALASAN / RATIONALE</th>
+                                    <tr className="bg-slate-50 border-b border-slate-200/80 text-slate-500 font-semibold text-[10px] tracking-widest uppercase">
+                                        <th className="p-4 w-12 text-center">Rank</th>
+                                        <th className="p-4">Nama Sekolah</th>
+                                        <th className="p-4">Distrik</th>
+                                        <th className="p-4 w-28 text-center">Health Score</th>
+                                        <th className="p-4">Intervensi</th>
+                                        <th className="p-4">Rationale</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-150">
+                                <tbody className="divide-y divide-slate-100">
                                     {recs.map(r => {
                                         const compScore = r.score_components?.compositeScore !== undefined 
                                             ? Number(r.score_components.compositeScore) 
@@ -900,13 +941,18 @@ export default function DinasDashboard() {
                                         const intervention = r.score_components?.recommendedIntervention || 'N/A';
                                         
                                         return (
-                                            <tr key={r.recommendation_id} className="hover:bg-gray-50/50">
-                                                <td className="p-4 text-center font-bold text-blue-600">{r.rank}</td>
-                                                <td className="p-4 font-bold text-gray-900">{r.school_name}</td>
-                                                <td className="p-4 text-gray-500">{r.district}</td>
-                                                <td className="p-4 text-center font-medium">{compScore.toFixed(0)}/100</td>
-                                                <td className="p-4 font-semibold text-gray-800">{intervention}</td>
-                                                <td className="p-4 text-gray-500 max-w-xs leading-relaxed">{r.rationale}</td>
+                                            <tr key={r.recommendation_id} className="hover:bg-slate-50/70 transition-colors duration-100">
+                                                <td className="p-4 text-center">
+                                                    <span className="inline-flex items-center justify-center w-7 h-7 bg-blue-600 text-white font-bold rounded-full text-[10px]">{r.rank}</span>
+                                                </td>
+                                                <td className="p-4 font-semibold text-slate-900">{r.school_name}</td>
+                                                <td className="p-4 text-slate-500">{r.district}</td>
+                                                <td className="p-4 text-center">
+                                                    <span className={`font-bold text-sm ${compScore < 60 ? 'text-red-500' : compScore < 80 ? 'text-amber-500' : 'text-emerald-600'}`}>{compScore.toFixed(0)}</span>
+                                                    <span className="text-slate-400 text-xs">/100</span>
+                                                </td>
+                                                <td className="p-4 font-medium text-slate-800">{intervention}</td>
+                                                <td className="p-4 text-slate-500 max-w-xs leading-relaxed">{r.rationale}</td>
                                             </tr>
                                         );
                                     })}
@@ -915,33 +961,33 @@ export default function DinasDashboard() {
                         </div>
 
                         {/* Alerts Management Section */}
-                        <div className="space-y-6">
-                            <h3 className="text-xl font-bold text-gray-900">Peringatan Dini & Kunjungan Lapangan</h3>
+                        <div className="space-y-5">
+                            <h3 className="text-xl font-bold text-slate-900 tracking-tight">Peringatan Dini & Kunjungan Lapangan</h3>
                             
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-                                    <div className="p-4 bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-600 uppercase tracking-wider">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <div className="lg:col-span-2 bg-white border border-slate-200/70 rounded-2xl shadow-[0_2px_12px_-2px_rgba(15,23,42,0.07)] overflow-hidden">
+                                    <div className="p-4 bg-slate-50 border-b border-slate-200/80 text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
                                         Daftar Alert Aktif
                                     </div>
-                                    <div className="divide-y divide-gray-150 max-h-[300px] overflow-y-auto">
+                                    <div className="divide-y divide-slate-100 max-h-[300px] overflow-y-auto">
                                         {alerts.map(a => (
-                                            <div key={a.alert_id} className="p-4 flex justify-between items-center text-xs">
+                                            <div key={a.alert_id} className="p-4 flex justify-between items-center text-xs hover:bg-slate-50/50 transition-colors duration-100">
                                                 <div className="space-y-1">
-                                                    <span className="font-bold text-gray-900">{a.school_name || 'SDN Lowokwaru 1'}</span>
-                                                    <div className="flex gap-2 items-center text-[10px] text-gray-400">
-                                                        <span>Urgensi: <strong className="text-red-500 uppercase">{a.severity}</strong></span>
-                                                        <span>•</span>
-                                                        <span>Dipicu: {new Date(a.opened_at).toLocaleString('id-ID')}</span>
+                                                    <span className="font-semibold text-slate-900">{a.school_name || 'SDN Lowokwaru 1'}</span>
+                                                    <div className="flex gap-2 items-center text-[10px] text-slate-400">
+                                                        <span className={`font-bold uppercase ${a.severity === 'Critical' ? 'text-red-500' : 'text-amber-500'}`}>{a.severity}</span>
+                                                        <span>&middot;</span>
+                                                        <span>{new Date(a.opened_at).toLocaleString('id-ID')}</span>
                                                     </div>
                                                 </div>
-                                                <div className="flex gap-3 items-center">
-                                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${a.status === 'Closed' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                                                <div className="flex gap-2 items-center">
+                                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold ${a.status === 'Closed' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
                                                         {a.status === 'Closed' ? 'Selesai' : 'Aktif'}
                                                     </span>
-                                                    {a.status === 'Open' && (
+                                                    {a.status === 'Open' && (userRole === 'Admin' || userRole === 'Supervisor') && (
                                                         <button
                                                             onClick={() => setResolvingAlertId(a.alert_id)}
-                                                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition duration-150 text-[10px] font-bold"
+                                                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-all duration-150 text-[10px] font-semibold shadow-sm"
                                                         >
                                                             Tindak Lanjut
                                                         </button>
@@ -952,31 +998,43 @@ export default function DinasDashboard() {
                                     </div>
                                 </div>
 
-                                <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+                                <div className="bg-white border border-slate-200/70 rounded-2xl shadow-[0_2px_12px_-2px_rgba(15,23,42,0.07)] p-6">
                                     <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Resolusi Peringatan Dini</h4>
-                                    {resolvingAlertId ? (
+                                    {!(userRole === 'Admin' || userRole === 'Supervisor') ? (
+                                        <div className="h-48 flex flex-col items-center justify-center text-center gap-3">
+                                            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+                                                <ShieldAlert className="w-5 h-5 text-slate-400" />
+                                            </div>
+                                            <p className="text-xs text-slate-500 font-medium">Akses Terbatas</p>
+                                            <p className="text-[10px] text-slate-400 max-w-[180px] leading-relaxed">Hanya Pengawas Lapangan dan Admin yang dapat mencatat tindak lanjut.</p>
+                                        </div>
+                                    ) : resolvingAlertId ? (
                                         <form onSubmit={handleResolveAlert} className="space-y-4">
                                             <div>
-                                                <label className="block text-[10px] font-bold text-gray-400 mb-2">CATATAN KUNJUNGAN PENGAWAS</label>
+                                                <label className="block text-[10px] font-semibold text-slate-400 tracking-widest uppercase mb-2">Catatan Kunjungan Pengawas</label>
                                                 <textarea
                                                     placeholder="Tuliskan hasil penyidikan atau pembinaan di lapangan..."
                                                     value={visitNote}
                                                     onChange={e => setVisitNote(e.target.value)}
                                                     rows={4}
-                                                    className="w-full bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white text-gray-900 p-3 rounded-xl transition duration-150 outline-none text-xs"
+                                                    className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 text-gray-900 p-3 rounded-xl transition-all duration-200 outline-none text-xs"
                                                     required
                                                 />
                                             </div>
                                             <button
                                                 type="submit"
-                                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl transition duration-150 text-xs"
+                                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl transition-all duration-150 text-xs btn-glow-blue"
                                             >
                                                 Simpan & Tutup Alert
                                             </button>
                                         </form>
                                     ) : (
-                                        <div className="h-48 flex items-center justify-center text-center text-xs text-gray-400">
-                                            Pilih tombol "Tindak Lanjut" pada alert aktif untuk mencatat resolusi kunjungan.
+                                        <div className="h-48 flex flex-col items-center justify-center text-center gap-3">
+                                            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+                                                <ShieldAlert className="w-5 h-5 text-slate-400" />
+                                            </div>
+                                            <p className="text-xs text-slate-500 font-medium">Pilih alert aktif</p>
+                                            <p className="text-[10px] text-slate-400 max-w-[160px] leading-relaxed">Klik "Tindak Lanjut" pada daftar alert untuk mencatat resolusi.</p>
                                         </div>
                                     )}
                                 </div>
@@ -986,40 +1044,43 @@ export default function DinasDashboard() {
                 )}
 
                 {activeTab === 'complaints' && (
-                    <div className="space-y-8">
+                    <div className="space-y-8 animate-fadein">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div>
-                                <h2 className="text-3xl font-black text-gray-900 tracking-tight font-display">Pengaduan Masuk (Inbound Review)</h2>
-                                <p className="text-sm text-gray-500 mt-2">Daftar laporan orang tua yang didekripsi secara aman dengan analisis sentimen, kategori, dan kemiripan AI.</p>
+                                <p className="text-[10px] font-semibold text-slate-400 tracking-widest uppercase mb-1">Manajemen Aduan</p>
+                                <h2 className="text-3xl font-black text-slate-900 tracking-tight">Pengaduan Masuk (Inbound Review)</h2>
+                                <p className="text-sm text-slate-500 mt-1.5">Daftar laporan orang tua yang didekripsi secara aman dengan analisis sentimen, kategori, dan kemiripan AI.</p>
                             </div>
-                            <button
-                                onClick={handleTriggerTraining}
-                                disabled={training}
-                                className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold px-4 py-2.5 rounded-xl transition duration-150 text-xs shadow-sm flex items-center gap-2 max-w-fit"
-                            >
-                                <RefreshCw className={`w-4 h-4 ${training ? 'animate-spin' : ''}`} /> Latih Ulang AI Klasifikasi
-                            </button>
+                            {userRole === 'Admin' && (
+                                <button
+                                    onClick={handleTriggerTraining}
+                                    disabled={training}
+                                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold px-4 py-2.5 rounded-xl transition-all duration-150 text-xs shadow-sm flex items-center gap-2 max-w-fit btn-glow-blue"
+                                >
+                                    <RefreshCw className={`w-4 h-4 ${training ? 'animate-spin' : ''}`} /> Latih Ulang AI Klasifikasi
+                                </button>
+                            )}
                         </div>
 
                         {trainingLogs && (
-                            <div className="bg-gray-50 border border-gray-150 p-6 rounded-2xl">
-                                <span className="block text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-2">LOG RETRAINING & HOT-RELOAD</span>
-                                <pre className="text-[10px] font-mono text-gray-700 overflow-x-auto whitespace-pre-wrap">{trainingLogs}</pre>
+                            <div className="bg-slate-900 border border-slate-700 p-5 rounded-2xl">
+                                <span className="block text-[10px] font-semibold text-slate-400 tracking-widest uppercase mb-2">📊 Log Retraining & Hot-Reload</span>
+                                <pre className="text-[10px] font-mono text-emerald-400 overflow-x-auto whitespace-pre-wrap leading-relaxed">{trainingLogs}</pre>
                             </div>
                         )}
 
                         {/* Complaints Card List */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             {complaints.map(c => (
-                                <div key={c.complaint_id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-4">
+                                <div key={c.complaint_id} className="bg-white border border-slate-200/70 rounded-2xl p-6 shadow-[0_2px_12px_-2px_rgba(15,23,42,0.07)] hover:shadow-[0_4px_20px_-4px_rgba(15,23,42,0.10)] transition-shadow duration-200 flex flex-col justify-between space-y-4">
                                     <div className="space-y-2">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-[10px] font-extrabold text-blue-600 tracking-wide uppercase">{c.category}</span>
-                                            <span className={`px-2 py-0.5 rounded text-[8px] font-bold ${c.urgency === 'Critical' ? 'bg-red-50 text-red-600' : 'bg-gray-50 text-gray-500'}`}>
-                                                URGENSI: {c.urgency.toUpperCase()}
+                                        <div className="flex justify-between items-center gap-2">
+                                            <span className="text-[10px] font-bold text-blue-600 tracking-widest uppercase bg-blue-50 px-2.5 py-1 rounded-full">{c.category}</span>
+                                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold ${c.urgency === 'Critical' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-500'}`}>
+                                                {c.urgency}
                                             </span>
                                         </div>
-                                        <p className="text-xs text-gray-800 leading-relaxed font-medium">{c.text}</p>
+                                        <p className="text-xs text-slate-800 leading-relaxed font-medium">{c.text}</p>
 
                                         {c.explanation && (
                                             <div className="bg-blue-50/50 border-l-2 border-blue-400 p-2.5 rounded-r-lg text-[10px] text-blue-800 leading-relaxed mt-2">
@@ -1028,16 +1089,16 @@ export default function DinasDashboard() {
                                         )}
 
                                         {c.suggested_response && (
-                                            <div className="bg-gray-50 border border-gray-150 p-3 rounded-lg text-[10px] text-gray-600 leading-relaxed font-mono mt-2 space-y-1">
-                                                <strong className="text-gray-800 block font-sans">📝 Rekomendasi Draf Tanggapan Empati:</strong>
-                                                <p className="whitespace-pre-wrap">{c.suggested_response}</p>
+                                            <div className="bg-slate-900 border border-slate-700/50 p-3.5 rounded-xl text-[10px] leading-relaxed mt-2 space-y-1.5">
+                                                <strong className="text-slate-300 block font-sans tracking-wide">📝 Draf Tanggapan Empati:</strong>
+                                                <p className="whitespace-pre-wrap text-slate-400 font-mono">{c.suggested_response}</p>
                                             </div>
                                         )}
                                     </div>
 
-                                    <div className="pt-4 border-t border-gray-100 flex justify-between items-center text-[10px] text-gray-400 font-semibold">
-                                        <span>Sentimen: <strong className="text-gray-600">{c.sentiment}</strong></span>
-                                        <span>Status: {c.status}</span>
+                                    <div className="pt-4 border-t border-slate-100 flex justify-between items-center text-[10px] text-slate-400 font-semibold">
+                                        <span>Sentimen: <strong className="text-slate-600">{c.sentiment}</strong></span>
+                                        <span className={`px-2 py-0.5 rounded-full font-semibold ${c.status === 'Resolved' ? 'bg-emerald-50 text-emerald-600' : c.status === 'In Progress' ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-500'}`}>{c.status}</span>
                                     </div>
                                 </div>
                             ))}
