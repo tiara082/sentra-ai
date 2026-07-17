@@ -12,6 +12,19 @@ CREATE TABLE IF NOT EXISTS schools (
     cluster_id INT NOT NULL DEFAULT 1
 );
 
+-- Users (Staff and Government roles)
+CREATE TABLE IF NOT EXISTS users (
+    user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL, -- 'Admin', 'Dinas Analyst', 'Supervisor', 'Principal', 'Compliance Officer'
+    district_scope VARCHAR(100) NOT NULL DEFAULT 'All', -- 'All' or specific district name, or school_id for Principal
+    mfa_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    status VARCHAR(50) NOT NULL DEFAULT 'Active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Official Indicators Table (Ingested from Dapodik/BOS/GTK etc.)
 CREATE TABLE IF NOT EXISTS official_indicators (
     indicator_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -141,19 +154,6 @@ CREATE TABLE IF NOT EXISTS recommendations (
     score_components JSONB NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT unique_school_period_recommendation UNIQUE (school_id, period)
-);
-
--- Users (Staff and Government roles)
-CREATE TABLE IF NOT EXISTS users (
-    user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    role VARCHAR(50) NOT NULL, -- 'Admin', 'Dinas Analyst', 'Supervisor', 'Principal', 'Compliance Officer'
-    district_scope VARCHAR(100) NOT NULL DEFAULT 'All', -- 'All' or specific district name, or school_id for Principal
-    mfa_enabled BOOLEAN NOT NULL DEFAULT FALSE,
-    status VARCHAR(50) NOT NULL DEFAULT 'Active',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Add ForeignKey constraint to simulations for users(user_id)

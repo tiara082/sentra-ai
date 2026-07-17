@@ -14,10 +14,24 @@ The project is structured into two main directories:
 ## Getting Started
 
 ### 1. Database Setup
-The backend requires a PostgreSQL database. Ensure PostgreSQL is running, then run the database schema:
+
+#### Option A: Local PostgreSQL
+Ensure PostgreSQL is running, then run the database schema:
 ```bash
 psql -d sentra_ai -f backend/src/schema.sql
 ```
+
+#### Option B: Supabase (Cloud PostgreSQL)
+To use Supabase as your database:
+1. Create a project on [Supabase](https://supabase.com/).
+2. Copy the **Transaction** or **Session** Pooler connection string from your Supabase Project Settings -> Database.
+3. Replace the `DATABASE_URL` in `backend/.env` with your Supabase connection string. Make sure to append `?sslmode=require` if it's not present.
+4. Run the database schema in your Supabase SQL Editor by copying the contents of `backend/src/schema.sql` and executing it.
+5. Run the seed script to populate the Supabase database:
+   ```bash
+   cd backend
+   npm run seed
+   ```
 
 ### 2. Backend Setup
 1. Navigate to the backend directory:

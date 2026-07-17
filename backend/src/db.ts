@@ -1,9 +1,12 @@
 import { Pool, QueryResult } from 'pg';
 import { config } from './config';
 
-// Create a new connection pool
+const isLocalhost = config.dbUrl.includes('localhost') || config.dbUrl.includes('127.0.0.1');
+
+// Create a new connection pool with SSL enabled for non-local connections (e.g. Supabase)
 export const pool = new Pool({
-    connectionString: config.dbUrl
+    connectionString: config.dbUrl,
+    ssl: isLocalhost ? false : { rejectUnauthorized: false }
 });
 
 // Helper for executing queries

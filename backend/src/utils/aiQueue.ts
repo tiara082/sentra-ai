@@ -39,7 +39,9 @@ class AIProcessingQueue {
             }
 
             // Run AI Complaint Intelligence pipeline (LLM + local fallbacks)
+            console.log('[AI Queue] Text to analyze:', job.text);
             const enrichment = await analyzeComplaintLLM(job.text, schoolName);
+            console.log('[AI Queue] Enrichment result:', enrichment);
             const { isDuplicate, duplicateOfId } = await detectDuplicate(job.text, job.schoolId, enrichment.category as any);
 
             await transaction(async (client) => {

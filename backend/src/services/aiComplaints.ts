@@ -393,8 +393,8 @@ export async function detectDuplicate(
     if (recentComplaints.rowCount === 0) {
         return { isDuplicate: false, duplicateOfId: null, similarity: 0 };
     }
-
     try {
+        console.log(`[detectDuplicate] Found ${recentComplaints.rowCount} recent complaints for category ${category}`);
         const newEmbedding = await getEmbedding(text, 'query');
         let maxSimilarity = 0;
         let duplicateOfId: string | null = null;
@@ -403,12 +403,14 @@ export async function detectDuplicate(
             const decryptedRowText = decryptText(row.text);
             const rowEmbedding = await getEmbedding(decryptedRowText, 'passage');
             const similarity = cosineSimilarity(newEmbedding, rowEmbedding);
+            console.log(`[detectDuplicate] Comparing with ID ${row.complaint_id}, text length: ${decryptedRowText.length}, Similarity: ${similarity}`);
 
             if (similarity > maxSimilarity) {
                 maxSimilarity = similarity;
                 duplicateOfId = row.complaint_id;
             }
         }
+        console.log(`[detectDuplicate] Max similarity: ${maxSimilarity}, isDuplicate: ${maxSimilarity >= 0.85}`);
 
         // Sentence embeddings duplicate threshold set conservatively to 0.85
         const isDuplicate = maxSimilarity >= 0.85;

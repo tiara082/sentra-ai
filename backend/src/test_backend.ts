@@ -46,6 +46,22 @@ function cleanupAndExit(code: number) {
     }
 }
 
+async function waitForAIProcessing(complaintId: string, token: string, maxRetries = 20): Promise<any> {
+    for (let i = 0; i < maxRetries; i++) {
+        const res = await fetch(`${BASE_URL}/complaints`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json() as any;
+        const complaint = data.complaints.find((c: any) => c.complaint_id === complaintId);
+        if (complaint && parseFloat(complaint.confidence) > 0) {
+            return complaint;
+        }
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    throw new Error(`Timeout waiting for AI processing of complaint ${complaintId}`);
+}
+
 async function executeTestFlow() {
     // A. Fetch school IDs from DB (pre-seeded)
     const schoolRes = await query("SELECT school_id, name FROM schools WHERE name IN ('SDN Lowokwaru 1', 'SDN Lowokwaru 2')");
@@ -218,18 +234,8 @@ async function executeTestFlow() {
     console.log(`✓ Complaint submitted successfully. Tracking Reference: ${createdComplaintId}`);
     
     console.log('Waiting for AI background job to finish...');
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Fetch complaints list as Dinas Analyst to verify AI fields
-    const checkRes = await fetch(`${BASE_URL}/complaints`, {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${rinaToken}` }
-    });
-    const checkData = await checkRes.json() as any;
-    const testComplaint = checkData.complaints.find((c: any) => c.complaint_id === createdComplaintId);
-    if (!testComplaint) {
-        throw new Error(`Could not find submitted complaint with ID ${createdComplaintId}`);
-    }
+    const testComplaint = await waitForAIProcessing(createdComplaintId, rinaToken);
+    console.log('[TEST] testComplaint fetched:', testComplaint);
 
     // Verify AI features output
     if (testComplaint.category !== 'Bullying') {
@@ -266,15 +272,7 @@ async function executeTestFlow() {
     }
 
     console.log('Waiting for duplicate detection background job...');
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Fetch complaints list again to verify duplicate flag on second complaint
-    const dupCheckRes = await fetch(`${BASE_URL}/complaints`, {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${rinaToken}` }
-    });
-    const dupCheckData = await dupCheckRes.json() as any;
-    const secondComplaint = dupCheckData.complaints.find((c: any) => c.complaint_id === duplicateData.complaintId);
+    const secondComplaint = await waitForAIProcessing(duplicateData.complaintId, rinaToken);
     if (!secondComplaint || !secondComplaint.duplicate_of_id) {
         throw new Error(`Duplicate detection failed. Second complaint not flagged as duplicate of first. duplicate_of_id: ${secondComplaint?.duplicate_of_id}`);
     }
